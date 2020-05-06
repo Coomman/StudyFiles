@@ -1,4 +1,6 @@
 ﻿using System.Collections.Generic;
+using System.IO;
+using System.Linq;
 using StudyFiles.DAL.DataProviders;
 using StudyFiles.DTO;
 
@@ -10,6 +12,8 @@ namespace StudyFiles.Core
         private int _curFacultyID;
         private int _curDisciplineID;
         private int _curCourseID;
+
+        private string _storagePath = @"res\";
 
         // TODO parsing ID from label-sender
         public List<UniversityDTO> GetUniversities()
@@ -69,6 +73,39 @@ namespace StudyFiles.Core
                 Teacher = teacherName,
                 DisciplineID = _curDisciplineID
             });
+        }
+
+        public void UploadFile(int courseID, string filePath)
+        {
+            var dir = Directory.CreateDirectory(
+                $@"{_storagePath}\{_curUniversityID}\{_curFacultyID}\{_curDisciplineID}\{courseID}");
+
+            var files = dir.GetFiles();
+
+            if(files.Any())
+                File.Copy(filePath, dir.FullName + $@"\{int.Parse(files.Last().Name) + 1}.txt");
+            else
+                File.Copy(filePath, dir.FullName + @"\1.txt");
+        }
+        public FileInfo[] ShowFiles(int courseID)
+        {
+            _curCourseID = courseID;
+
+            var dir = Directory.CreateDirectory(
+                $@"{_storagePath}\{_curUniversityID}\{_curFacultyID}\{_curDisciplineID}\{courseID}");
+
+            return dir.GetFiles();
+        }
+        public string ReadFile(string fileName)
+        {
+            var dir = Directory.CreateDirectory(
+                $@"{_storagePath}\{_curUniversityID}\{_curFacultyID}\{_curDisciplineID}\{_curCourseID}");
+
+            var file = dir.GetFiles().FirstOrDefault(f => f.Name == fileName);
+
+            return file == null 
+                ? null 
+                : File.ReadAllText(file.FullName);
         }
     }
 }

@@ -33,6 +33,9 @@ namespace StudyFiles.UI
 
             _cmd.Add("cd", CdCommand);
             _cmd.Add("add", AddCommand);
+            _cmd.Add("upload", UploadCommand);
+            _cmd.Add("show", ShowCommand);
+            _cmd.Add("open" , OpenCommand);
 
             Visualize();
         }
@@ -62,18 +65,26 @@ namespace StudyFiles.UI
                     }
 
                     if (!query.Contains(' '))
-                        throw new ArgumentException();
+                        throw new ArgumentException("Unknown command");
 
                     _cmd[query[.. query.IndexOf(' ')]].Invoke(query.Substring(query.IndexOf(' ') + 1).Trim());
                 }
-                catch (ArgumentException)
+                catch (ArgumentException e)
                 {
-                    Writer.Colored("Unknown command", ConsoleColor.Red);
+                    Writer.Colored(e.Message, ConsoleColor.Red);
                 }
                 catch (InvalidDataException e)
                 {
                     _depth--;
                     Writer.Colored(e.Message, ConsoleColor.Blue);
+                }
+                catch (ApplicationException e)
+                {
+                    Writer.Colored(e.Message, ConsoleColor.DarkMagenta);
+                }
+                catch (Exception)
+                {
+                    continue;
                 }
             }
         }
@@ -87,8 +98,11 @@ namespace StudyFiles.UI
                 return;
             }
 
+            if(_depth == 3)
+                throw new ArgumentException("You can't go any deeper (._.')");
+
             if (!int.TryParse(query, out int id))
-                throw new ArgumentException();
+                throw new ArgumentException("Unknown command");
 
             _depth = Math.Min(3, _depth + 1);
             Visualize(id);
@@ -112,6 +126,47 @@ namespace StudyFiles.UI
             }
 
             Visualize();
+        }
+        private void UploadCommand(string query)
+        {
+            if(_depth != 3)
+                throw new ApplicationException("You should choose a course directory");
+
+            if(!int.TryParse(query[..query.IndexOf(' ')], out int id))
+                throw new ApplicationException("Wrong course id");
+
+            query = query.Substring(query.IndexOf(' ')).Trim();
+
+            if (!File.Exists(query))
+                throw new ApplicationException("File not found");
+
+            Menu.UploadFile(id, query);
+        }
+        private void ShowCommand(string query)
+        {
+            if (_depth != 3)
+                throw new ApplicationException("You should choose a course directory");
+
+            if (!int.TryParse(query, out int id))
+                throw new ApplicationException("Wrong course id");
+
+            var files = Menu.ShowFiles(id);
+            if(!files.Any())
+                throw new ApplicationException("Course does not contain files");
+
+            foreach(var file in files)
+                Writer.WriteLine($"{file.Name}\t{file.CreationTime}");
+
+            _depth = 4;
+        }
+        private void OpenCommand(string query)
+        {
+            var fileContent = Menu.ReadFile(query);
+
+            if(fileContent == null)
+                throw new ArgumentException("Wrong file name");
+
+            Writer.WriteLine(fileContent);
         }
 
         public void Visualize(int id = -1)
