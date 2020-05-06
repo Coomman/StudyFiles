@@ -23,6 +23,7 @@ namespace StudyFiles.UI
         private Facade Menu { get; } = new Facade();
         private bool IsRunning { get; set; } = true;
 
+        private readonly Dictionary<string, Action> _services = new Dictionary<string, Action>();
         private readonly Dictionary<string, Action<string>> _cmd = new Dictionary<string, Action<string>>();
         private int _depth;
 
@@ -30,6 +31,11 @@ namespace StudyFiles.UI
         {
             Reader = input;
             Writer = output;
+
+            _services.Add("ls", () => Visualize());
+            _services.Add("clear", Console.Clear);
+            _services.Add("help", Help);
+            _services.Add("exit", () => IsRunning = false);
 
             _cmd.Add("cd", CdCommand);
             _cmd.Add("add", AddCommand);
@@ -50,23 +56,11 @@ namespace StudyFiles.UI
                 {
                     string query = Reader.ReadLine();
 
-                    if (query == "exit")
-                        break;
-
-                    if (query == "ls")
-                    {
-                        Visualize(-1);
-                        continue;
-                    }
-
-                    if (query == "clear")
-                    {
-                        Console.Clear();
-                        continue;
-                    }
-
                     if (!query.Contains(' '))
-                        throw new ArgumentException("Unknown command");
+                    {
+                        _services[query].Invoke();
+                        continue;
+                    }
 
                     _cmd[query[.. query.IndexOf(' ')]].Invoke(query.Substring(query.IndexOf(' ') + 1).Trim());
                 }
@@ -85,7 +79,7 @@ namespace StudyFiles.UI
                 }
                 catch (Exception)
                 {
-                    continue;
+                    Writer.Colored("Unknown command", ConsoleColor.Red);
                 }
             }
         }
@@ -180,6 +174,21 @@ namespace StudyFiles.UI
                 Console.WriteLine(file);
         }
 
+        public void Help()
+        {
+            Writer.Colored("cd - standard cd\n" +
+                           "add <entityID> - add substorage into the current storage lvl\n" +
+                           "upload <path_to_file> - upload a file to a current course storage\n" +
+                           "show <courseID> - show all files, this course contains\n" +
+                           "open <filename> - write file data\n" +
+                           "search <query> - searches your query recursively in all subfolders\n",
+                ConsoleColor.DarkGreen);
+
+            Writer.Colored("ls - standard ls\n" +
+                           "clear - clear console\n" +
+                           "exit - exit\n", 
+                ConsoleColor.DarkBlue);
+        }
         public void Visualize(int id = -1)
         {
             switch (_depth)
