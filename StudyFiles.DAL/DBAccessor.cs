@@ -7,7 +7,7 @@ using System.Configuration;
 
 namespace StudyFiles.DAL
 {
-    public class DBAccessor
+    public static class DBAccessor
     {
         public static List<T> GetData<T>(IMapper<T> mapper, string queryString)
         {
