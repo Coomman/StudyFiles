@@ -36,6 +36,7 @@ namespace StudyFiles.UI
             _cmd.Add("upload", UploadCommand);
             _cmd.Add("show", ShowCommand);
             _cmd.Add("open" , OpenCommand);
+            _cmd.Add("search", SearchCommand);
 
             Visualize();
         }
@@ -167,6 +168,16 @@ namespace StudyFiles.UI
                 throw new ArgumentException("Wrong file name");
 
             Writer.WriteLine(fileContent);
+        }
+        private void SearchCommand(string query)
+        {
+            var files = Menu.SearchFiles(_depth, query);
+
+            if (!files.Any())
+                throw new ApplicationException("No pattern matching files");
+
+            foreach (var file in files)
+                Console.WriteLine(file);
         }
 
         public void Visualize(int id = -1)

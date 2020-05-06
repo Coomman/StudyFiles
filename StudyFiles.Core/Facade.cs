@@ -1,8 +1,8 @@
-﻿using System.Collections.Generic;
-using System.IO;
+﻿using System.IO;
 using System.Linq;
-using StudyFiles.DAL.DataProviders;
+using System.Collections.Generic;
 using StudyFiles.DTO;
+using StudyFiles.DAL.DataProviders;
 
 namespace StudyFiles.Core
 {
@@ -106,6 +106,26 @@ namespace StudyFiles.Core
             return file == null 
                 ? null 
                 : File.ReadAllText(file.FullName);
+        }
+
+        public List<string> SearchFiles(int depth, string query)
+        {
+            var searchPath = _storagePath.Clone() as string;
+
+            if (depth > 0)
+                searchPath += $@"{_curUniversityID}";
+
+            if (depth > 1)
+                searchPath += $@"\{_curFacultyID}";
+
+            if (depth > 2)
+                searchPath += $@"\{_curDisciplineID}";
+
+            if (depth > 3)
+                searchPath += $@"\{_curCourseID}";
+
+            return Directory.GetFiles(searchPath, "*.*", SearchOption.AllDirectories)
+                .Where(f => File.ReadAllText(f).Contains(query)).ToList();
         }
     }
 }
