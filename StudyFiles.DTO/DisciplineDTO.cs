@@ -1,9 +1,11 @@
-﻿namespace StudyFiles.DTO
+﻿using System;
+
+namespace StudyFiles.DTO
 {
-    public class DisciplineDTO
+    public class DisciplineDTO : IEntityDTO
     {
-        public int ID { get; set; }
+        public Guid ID { get; set; }
         public string Name { get; set; }
-        public int FacultyID { get; set; }
+        public Guid FacultyID { get; set; }
     }
 }

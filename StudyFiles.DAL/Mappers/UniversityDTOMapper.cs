@@ -1,4 +1,5 @@
-﻿using System.Data.SqlClient;
+﻿using System;
+using System.Data.SqlClient;
 using StudyFiles.DTO;
 
 namespace StudyFiles.DAL.Mappers
@@ -9,7 +10,7 @@ namespace StudyFiles.DAL.Mappers
         {
             return new UniversityDTO
             {
-                ID = (int) dr["ID"],
+                ID = (Guid) dr["ID"],
                 Name = (string) dr["Name"]
             };
         }

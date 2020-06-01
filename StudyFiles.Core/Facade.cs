@@ -1,6 +1,8 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 using System.Linq;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using StudyFiles.DTO;
 using StudyFiles.DAL.DataProviders;
 
@@ -8,37 +10,42 @@ namespace StudyFiles.Core
 {
     public class Facade
     {
-        private int _curUniversityID;
-        private int _curFacultyID;
-        private int _curDisciplineID;
-        private int _curCourseID;
+        private Guid _curUniversityID;
+        private Guid _curFacultyID;
+        private Guid _curDisciplineID;
+        private Guid _curCourseID;
 
         private string _storagePath = @"res\";
 
-        // TODO parsing ID from label-sender
+        public ObservableCollection<IEntityDTO> GetModelsList(int depth, Guid id)
+        {
+            return depth switch
+            {
+                0 => new ObservableCollection<IEntityDTO>(GetUniversities()),
+                1 => new ObservableCollection<IEntityDTO>(GetFaculties(id)),
+                2 => new ObservableCollection<IEntityDTO>(GetDisciplines(id)),
+                3 => new ObservableCollection<IEntityDTO>(GetCourses(id)),
+                _ => null
+            };
+        }
+
         public List<UniversityDTO> GetUniversities()
         {
             return UniversityDataProviderMock.GetUniversities();
         }
-        public List<FacultyDTO> GetFaculties(int universityID)
+        public List<FacultyDTO> GetFaculties(Guid universityID)
         {
-            if (universityID != -1)
-                _curUniversityID = universityID;
-
+            _curUniversityID = universityID;
             return FacultyDataProviderMock.GetFaculties(_curUniversityID);
         }
-        public List<DisciplineDTO> GetDisciplines(int facultyID)
+        public List<DisciplineDTO> GetDisciplines(Guid facultyID)
         {
-            if(facultyID != -1)
-                _curFacultyID = facultyID;
-
+            _curFacultyID = facultyID;
             return DisciplineDataProviderMock.GetDisciplines(_curFacultyID);
         }
-        public List<CourseDTO> GetCourses(int disciplineID)
+        public List<CourseDTO> GetCourses(Guid disciplineID)
         {
-            if(disciplineID != -1)
-                _curDisciplineID = disciplineID;
-
+            _curDisciplineID = disciplineID;
             return CourseDataProviderMock.GetCourses(_curDisciplineID);
         }
 
@@ -70,7 +77,7 @@ namespace StudyFiles.Core
         {
             CourseDataProviderMock.AddCourse(new CourseDTO
             {
-                Teacher = teacherName,
+                Name = teacherName,
                 DisciplineID = _curDisciplineID
             });
         }
@@ -87,7 +94,7 @@ namespace StudyFiles.Core
             else
                 File.Copy(filePath, dir.FullName + @"\1.txt");
         }
-        public FileInfo[] ShowFiles(int courseID)
+        public FileInfo[] ShowFiles(Guid courseID)
         {
             _curCourseID = courseID;
 
