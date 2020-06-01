@@ -17,6 +17,8 @@ namespace StudyFiles.Core
 
         private string _storagePath = @"res\";
 
+        #region Get
+
         public ObservableCollection<IEntityDTO> GetModelsList(int depth, Guid id)
         {
             return depth switch
@@ -29,58 +31,77 @@ namespace StudyFiles.Core
             };
         }
 
-        public List<UniversityDTO> GetUniversities()
+        private IEnumerable<UniversityDTO> GetUniversities()
         {
             return UniversityDataProviderMock.GetUniversities();
         }
-        public List<FacultyDTO> GetFaculties(Guid universityID)
+        private IEnumerable<FacultyDTO> GetFaculties(Guid universityID)
         {
             _curUniversityID = universityID;
             return FacultyDataProviderMock.GetFaculties(_curUniversityID);
         }
-        public List<DisciplineDTO> GetDisciplines(Guid facultyID)
+        private IEnumerable<DisciplineDTO> GetDisciplines(Guid facultyID)
         {
             _curFacultyID = facultyID;
             return DisciplineDataProviderMock.GetDisciplines(_curFacultyID);
         }
-        public List<CourseDTO> GetCourses(Guid disciplineID)
+        private IEnumerable<CourseDTO> GetCourses(Guid disciplineID)
         {
             _curDisciplineID = disciplineID;
             return CourseDataProviderMock.GetCourses(_curDisciplineID);
         }
 
-        // TODO receiving new object info from UI form and form updating
-        public void AddUniversity(string universityName)
+        #endregion
+
+        #region Add
+
+        public IEntityDTO AddNewModel(int depth, string modelName)
         {
-            UniversityDataProviderMock.AddUniversity(new UniversityDTO
+            return depth switch
             {
-                Name = universityName
-            });
+                0 => AddUniversity(modelName),
+                1 => AddFaculty(modelName),
+                2 => AddDiscipline(modelName),
+                3 => AddCourse(modelName),
+                _ => null
+            };
         }
-        public void AddFaculty(string facultyName)
+
+        private IEntityDTO AddUniversity(string universityName)
         {
-            FacultyDataProviderMock.AddFaculty(new FacultyDTO
-            {
-                Name = facultyName,
-                UniversityID = _curUniversityID
-            });
+            var uni = new UniversityDTO(Guid.NewGuid(), universityName);
+
+            UniversityDataProviderMock.AddUniversity(uni);
+
+            return uni;
         }
-        public void AddDiscipline(string disciplineName)
+        private IEntityDTO AddFaculty(string facultyName)
         {
-            DisciplineDataProviderMock.AddDiscipline(new DisciplineDTO
-            {
-                Name = disciplineName,
-                FacultyID = _curFacultyID
-            });
+            var faculty = new FacultyDTO(Guid.NewGuid(), facultyName, _curUniversityID);
+
+            FacultyDataProviderMock.AddFaculty(faculty);
+
+            return faculty;
         }
-        public void AddCourse(string teacherName)
+        private IEntityDTO AddDiscipline(string disciplineName)
         {
-            CourseDataProviderMock.AddCourse(new CourseDTO
-            {
-                Name = teacherName,
-                DisciplineID = _curDisciplineID
-            });
+            var disc = new DisciplineDTO(Guid.NewGuid(), disciplineName, _curFacultyID);
+
+            DisciplineDataProviderMock.AddDiscipline(disc);
+
+            return disc;
         }
+        private IEntityDTO AddCourse(string teacherName)
+        {
+            var course = new CourseDTO(Guid.NewGuid(), teacherName, _curDisciplineID);
+
+            CourseDataProviderMock.AddCourse(course);
+
+            return course;
+        }
+
+        #endregion
+
 
         public void UploadFile(int courseID, string filePath)
         {

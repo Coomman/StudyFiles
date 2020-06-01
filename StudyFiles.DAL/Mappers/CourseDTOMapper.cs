@@ -8,12 +8,9 @@ namespace StudyFiles.DAL.Mappers
     {
         public CourseDTO ReadItem(SqlDataReader dr)
         {
-            return new CourseDTO()
-            {
-                ID = (Guid)dr["ID"],
-                Name = (string)dr["Name"],
-                DisciplineID = (Guid)dr["DisciplineID"]
-            };
+            return new CourseDTO((Guid)dr["ID"], 
+                (string)dr["Name"],
+                (Guid)dr["DisciplineID"]);
         }
     }
 }
