@@ -3,6 +3,7 @@ using System.IO;
 using System.Linq;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Globalization;
 using StudyFiles.DTO;
 using StudyFiles.DAL.DataProviders;
 
@@ -15,56 +16,99 @@ namespace StudyFiles.Core
         private Guid _curDisciplineID;
         private Guid _curCourseID;
 
-        private string _storagePath = @"res\";
+        private const string StoragePath = @"res\";
 
-        #region Get
-
-        public ObservableCollection<IEntityDTO> GetModelsList(int depth, Guid id)
+        public Facade()
         {
-            return depth switch
+            _getCmd = new Dictionary<int, Func<Guid, IEnumerable<IEntityDTO>>>
             {
-                0 => new ObservableCollection<IEntityDTO>(GetUniversities()),
-                1 => new ObservableCollection<IEntityDTO>(GetFaculties(id)),
-                2 => new ObservableCollection<IEntityDTO>(GetDisciplines(id)),
-                3 => new ObservableCollection<IEntityDTO>(GetCourses(id)),
-                _ => null
+                [0] = id => GetUniversities(),
+                [1] = GetFaculties,
+                [2] = GetDisciplines,
+                [3] = GetCourses,
+                [4] = GetFiles
+            };
+
+            _addCmd = new Dictionary<int, Func<string, IEntityDTO>>
+            {
+                [0] = AddUniversity,
+                [1] = AddFaculty,
+                [2] = AddDiscipline,
+                [3] = AddCourse,
+                [4] = UploadFile
             };
         }
 
-        private IEnumerable<UniversityDTO> GetUniversities()
+        private DirectoryInfo GetDirectory()
+        {
+            var path = Path.Combine(StoragePath,
+                _curUniversityID.ToString(), _curFacultyID.ToString(), _curDisciplineID.ToString(), _curCourseID.ToString());
+
+            return Directory.CreateDirectory(path);
+        }
+        private static string ByteSizeToString(long byteCount)
+        {
+            string[] suf = { "B", "KB", "MB", "GB", "TB"};
+
+            if (byteCount == 0)
+                return "0 " + suf[0];
+
+            long bytes = Math.Abs(byteCount);
+            int place = Convert.ToInt32(Math.Floor(Math.Log(bytes, 1024)));
+            double num = Math.Round(bytes / Math.Pow(1024, place), 1);
+
+            return$"{(Math.Sign(byteCount) * num).ToString(CultureInfo.InvariantCulture)} {suf[place]}";
+        }
+
+        #region Get
+
+        private readonly Dictionary<int, Func<Guid, IEnumerable<IEntityDTO>>> _getCmd;
+
+        public ObservableCollection<IEntityDTO> GetModelsList(int depth, Guid id)
+        {
+            return new ObservableCollection<IEntityDTO>(_getCmd[depth].Invoke(id));
+        }
+
+        private IEnumerable<IEntityDTO> GetUniversities()
         {
             return UniversityDataProviderMock.GetUniversities();
         }
-        private IEnumerable<FacultyDTO> GetFaculties(Guid universityID)
+        private IEnumerable<IEntityDTO> GetFaculties(Guid universityID)
         {
             _curUniversityID = universityID;
             return FacultyDataProviderMock.GetFaculties(_curUniversityID);
         }
-        private IEnumerable<DisciplineDTO> GetDisciplines(Guid facultyID)
+        private IEnumerable<IEntityDTO> GetDisciplines(Guid facultyID)
         {
             _curFacultyID = facultyID;
             return DisciplineDataProviderMock.GetDisciplines(_curFacultyID);
         }
-        private IEnumerable<CourseDTO> GetCourses(Guid disciplineID)
+        private IEnumerable<IEntityDTO> GetCourses(Guid disciplineID)
         {
             _curDisciplineID = disciplineID;
             return CourseDataProviderMock.GetCourses(_curDisciplineID);
+        }
+
+        private IEnumerable<IEntityDTO> GetFiles(Guid courseID)
+        {
+            _curCourseID = courseID;
+
+            var dir = GetDirectory();
+
+            return dir.GetFiles()
+                .Select(file => new FileDTO(Guid.Empty, file.Name, ByteSizeToString(file.Length), courseID, 
+                    file.CreationTime.ToLongDateString()));
         }
 
         #endregion
 
         #region Add
 
+        private readonly Dictionary<int, Func<string, IEntityDTO>> _addCmd;
+
         public IEntityDTO AddNewModel(int depth, string modelName)
         {
-            return depth switch
-            {
-                0 => AddUniversity(modelName),
-                1 => AddFaculty(modelName),
-                2 => AddDiscipline(modelName),
-                3 => AddCourse(modelName),
-                _ => null
-            };
+            return _addCmd[depth].Invoke(modelName);
         }
 
         private IEntityDTO AddUniversity(string universityName)
@@ -100,34 +144,30 @@ namespace StudyFiles.Core
             return course;
         }
 
-        #endregion
-
-
-        public void UploadFile(int courseID, string filePath)
+        private IEntityDTO UploadFile(string filePath)
         {
-            var dir = Directory.CreateDirectory(
-                $@"{_storagePath}\{_curUniversityID}\{_curFacultyID}\{_curDisciplineID}\{courseID}");
+            var dir = GetDirectory();
 
             var files = dir.GetFiles();
 
-            if(files.Any())
-                File.Copy(filePath, dir.FullName + $@"\{int.Parse(files.Last().Name) + 1}.txt");
-            else
-                File.Copy(filePath, dir.FullName + @"\1.txt");
-        }
-        public FileInfo[] ShowFiles(Guid courseID)
-        {
-            _curCourseID = courseID;
+            var fileName = files.Any()
+                ? $@"\{int.Parse(files.Last().Name) + 1}.txt"
+                : @"\1.txt";
 
-            var dir = Directory.CreateDirectory(
-                $@"{_storagePath}\{_curUniversityID}\{_curFacultyID}\{_curDisciplineID}\{courseID}");
+            File.Copy(filePath, dir.FullName + fileName);
 
-            return dir.GetFiles();
+            var fileInfo = new FileInfo(filePath);
+            
+            return new FileDTO(Guid.Empty, fileInfo.Name, ByteSizeToString(fileInfo.Length), 
+                _curCourseID, fileInfo.CreationTime.ToLongDateString());
         }
+
+        #endregion
+
         public string ReadFile(string fileName)
         {
             var dir = Directory.CreateDirectory(
-                $@"{_storagePath}\{_curUniversityID}\{_curFacultyID}\{_curDisciplineID}\{_curCourseID}");
+                $@"{StoragePath}\{_curUniversityID}\{_curFacultyID}\{_curDisciplineID}\{_curCourseID}");
 
             var file = dir.GetFiles().FirstOrDefault(f => f.Name == fileName);
 
@@ -135,10 +175,9 @@ namespace StudyFiles.Core
                 ? null 
                 : File.ReadAllText(file.FullName);
         }
-
         public List<string> SearchFiles(int depth, string query)
         {
-            var searchPath = _storagePath.Clone() as string;
+            var searchPath = StoragePath.Clone() as string;
 
             if (depth > 0)
                 searchPath += $@"{_curUniversityID}";
