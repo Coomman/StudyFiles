@@ -16,6 +16,7 @@ namespace StudyFiles.GUI
         public ObservableCollection<IEntityDTO> Catalog = new ObservableCollection<IEntityDTO>();
         public ObservableCollection<IEntityDTO> Models { get; set; }
         public IEntityDTO SelectedModel { get; set; }
+        public int Level => Catalog.Count;
 
         public ApplicationViewModel()
         {
@@ -44,8 +45,18 @@ namespace StudyFiles.GUI
 
         public void AddItem(string name)
         {
-            Models.RemoveAt(Models.Count - 1);
+            if(Level != 4)
+                Models.RemoveAt(Models.Count - 1);
+
             Models.Add(_supplier.AddNewModel(Catalog.Count, name));
+        }
+
+        public void ShowFile()
+        {
+            _supplier.ReadFile(SelectedModel.Name);
+
+            Models = new ObservableCollection<IEntityDTO>(new []{new FileViewDTO(_supplier.ReadFile(SelectedModel.Name))});
+            OnPropertyChanged(nameof(Models));
         }
 
         public event PropertyChangedEventHandler PropertyChanged;

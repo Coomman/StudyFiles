@@ -2,6 +2,7 @@
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using Microsoft.Win32;
 using StudyFiles.DTO;
 
 // ReSharper disable PossibleNullReferenceException
@@ -24,10 +25,25 @@ namespace StudyFiles.GUI
 
         private void Add_OnClick(object sender, RoutedEventArgs e)
         {
-            var nullObject = new NullDTO();
-
             var vm = DataContext as ApplicationViewModel;
-            vm.Models.Add(nullObject);
+
+            if (_depth != 4)
+            {
+                vm.Models.Add(new NullDTO());
+                return;
+            }
+
+            var fd = new OpenFileDialog
+            {
+                Title = "Select a file",
+
+                Filter = "PDF files (*.pdf)|*.pdf|" +
+                         "Microsoft Word (*.doc;*.docx)|*.doc;*.docx|" +
+                         "Text files (*.txt)|*.txt" 
+            };
+
+            if (fd.ShowDialog() == true)
+                vm.AddItem(fd.FileName);
         }
 
         private void Delete_OnClick(object sender, RoutedEventArgs e)
@@ -46,12 +62,21 @@ namespace StudyFiles.GUI
             _depth--;
         }
             
-        private void Items_OnItemDoubleClick(object sender, MouseButtonEventArgs mouseButtonEventArgs)
+        private void Table_OnItemDoubleClick(object sender, MouseButtonEventArgs mouseButtonEventArgs)
         {
             if (mouseButtonEventArgs.ChangedButton != MouseButton.Left)
                 return;
 
             var vm = DataContext as ApplicationViewModel;
+
+            if (_depth == 4)
+            {
+                vm.ShowFile();
+
+                _depth++;
+                return;
+            }
+
             vm.GetNextItemList();
 
             _depth++;
@@ -77,7 +102,7 @@ namespace StudyFiles.GUI
         private void NewItem_OnKeyDown(object sender, KeyEventArgs e)
         {
             if (e.Key == Key.Enter)
-                ListBox.Focus();
+                Table.Focus();
         }
     }
 }

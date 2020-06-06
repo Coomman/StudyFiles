@@ -15,6 +15,7 @@ namespace StudyFiles.GUI
             {
                 NullDTO _ => (ui.FindResource("NullObject") as DataTemplate),
                 FileDTO _ => (ui.FindResource("File") as DataTemplate),
+                FileViewDTO _ => (ui.FindResource("FileView") as DataTemplate),
                 _ => (ui.FindResource("RealItem") as DataTemplate)
             };
         }

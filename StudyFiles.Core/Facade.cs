@@ -46,19 +46,6 @@ namespace StudyFiles.Core
 
             return Directory.CreateDirectory(path);
         }
-        private static string ByteSizeToString(long byteCount)
-        {
-            string[] suf = { "B", "KB", "MB", "GB", "TB"};
-
-            if (byteCount == 0)
-                return "0 " + suf[0];
-
-            long bytes = Math.Abs(byteCount);
-            int place = Convert.ToInt32(Math.Floor(Math.Log(bytes, 1024)));
-            double num = Math.Round(bytes / Math.Pow(1024, place), 1);
-
-            return$"{(Math.Sign(byteCount) * num).ToString(CultureInfo.InvariantCulture)} {suf[place]}";
-        }
 
         #region Get
 
@@ -92,12 +79,7 @@ namespace StudyFiles.Core
         private IEnumerable<IEntityDTO> GetFiles(Guid courseID)
         {
             _curCourseID = courseID;
-
-            var dir = GetDirectory();
-
-            return dir.GetFiles()
-                .Select(file => new FileDTO(Guid.Empty, file.Name, ByteSizeToString(file.Length), courseID, 
-                    file.CreationTime.ToLongDateString()));
+            return FileDataProvider.GetFiles(GetDirectory());
         }
 
         #endregion
@@ -146,35 +128,25 @@ namespace StudyFiles.Core
 
         private IEntityDTO UploadFile(string filePath)
         {
-            var dir = GetDirectory();
-
-            var files = dir.GetFiles();
-
-            var fileName = files.Any()
-                ? $@"\{int.Parse(files.Last().Name) + 1}.txt"
-                : @"\1.txt";
-
-            File.Copy(filePath, dir.FullName + fileName);
-
-            var fileInfo = new FileInfo(filePath);
-            
-            return new FileDTO(Guid.Empty, fileInfo.Name, ByteSizeToString(fileInfo.Length), 
-                _curCourseID, fileInfo.CreationTime.ToLongDateString());
+            return FileDataProvider.UploadFile(GetDirectory(), filePath);
         }
 
         #endregion
 
         public string ReadFile(string fileName)
         {
-            var dir = Directory.CreateDirectory(
-                $@"{StoragePath}\{_curUniversityID}\{_curFacultyID}\{_curDisciplineID}\{_curCourseID}");
+            var filePath = Path.Combine(GetDirectory().FullName, fileName);
 
-            var file = dir.GetFiles().FirstOrDefault(f => f.Name == fileName);
-
-            return file == null 
-                ? null 
-                : File.ReadAllText(file.FullName);
+            return FileReader.ReadFile(new FileInfo(filePath));
         }
+
+        // TODO: 1) Fix file displaying +--
+        // ?? 2) File conversion when adding
+        // 3) Fix file view
+        // 4) Switch to commands
+        // 5) Add search
+        // 6) Switch to DataGrid
+
         public List<string> SearchFiles(int depth, string query)
         {
             var searchPath = StoragePath.Clone() as string;
