@@ -9,9 +9,9 @@ namespace StudyFiles.DAL.Mappers
         public DisciplineDTO ReadItem(SqlDataReader dr)
         {
             return new DisciplineDTO(
-                (Guid)dr["ID"],
+                (int)dr["ID"],
                 (string)dr["Name"],
-                (Guid)dr["FacultyID"]);
+                (int)dr["FacultyID"]);
         }
     }
 }

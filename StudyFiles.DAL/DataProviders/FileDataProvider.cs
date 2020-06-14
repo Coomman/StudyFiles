@@ -1,8 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Globalization;
+using System.Collections.Generic;
 using StudyFiles.DTO;
 
 namespace StudyFiles.DAL.DataProviders
@@ -23,21 +23,21 @@ namespace StudyFiles.DAL.DataProviders
             return $"{(Math.Sign(byteCount) * num).ToString(CultureInfo.InvariantCulture)} {suf[place]}";
         }
 
-        public static IEnumerable<FileDTO> GetFiles(DirectoryInfo dir)
+        public static IEnumerable<FileDTO> GetFiles(DirectoryInfo dir, int courseId)
         {
             return dir.GetFiles()
-                .Select(file => new FileDTO(Guid.NewGuid(), file.Name, ByteSizeToString(file.Length), Guid.Empty, 
-                    file.CreationTime.ToString("MM/dd/yyyy h:mm tt")));
+                .Select(file => new FileDTO(0, file.Name, ByteSizeToString(file.Length), courseId, 
+                    file.CreationTime.ToString("MM/dd/yyyy h:mm")));
         }
 
-        public static FileDTO UploadFile(DirectoryInfo dir, string filePath)
+        public static FileDTO UploadFile(DirectoryInfo dir, int courseId, string filePath)
         {
             var fileInfo = new FileInfo(filePath);
 
             File.Copy(filePath, Path.Combine(dir.FullName, fileInfo.Name));
 
-            return new FileDTO(Guid.NewGuid(), fileInfo.Name, ByteSizeToString(fileInfo.Length),
-                Guid.Empty, fileInfo.CreationTimeUtc.ToString("MM/dd/yyyy h:mm"));
+            return new FileDTO(0, fileInfo.Name, ByteSizeToString(fileInfo.Length),
+                courseId, fileInfo.CreationTimeUtc.ToString("MM/dd/yyyy h:mm"));
         }
     }
 }

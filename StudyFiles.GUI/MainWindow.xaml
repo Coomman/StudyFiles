@@ -3,10 +3,13 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity"
         mc:Ignorable="d"
 
         xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
         xmlns:gui="clr-namespace:StudyFiles.GUI"
+        xmlns:visualBasic="clr-namespace:Microsoft.VisualBasic;assembly=Microsoft.VisualBasic.Core"
+        xmlns:controls="clr-namespace:StudyFiles.GUI.Controls"
         TextElement.Foreground="{DynamicResource MaterialDesignBody}"
         TextElement.FontWeight="Regular"
         TextElement.FontSize="13"
@@ -16,8 +19,12 @@
         FontFamily="{DynamicResource MaterialDesignFont}"
         Title="StudyFiles" Width="1280" Height="720">
 
+    <Window.InputBindings>
+        <MouseBinding MouseAction="LeftClick" Command="{Binding WindowMouseClickCommand}"></MouseBinding>
+    </Window.InputBindings>
+
     <Window.Resources>
-        <gui:ItemTemplateSelector x:Key="ItemTemplateSelector"/>
+        <controls:ItemTemplateSelector x:Key="ItemTemplateSelector"/>
         <DataTemplate x:Key="RealItem">
             <StackPanel Margin="5" Orientation="Horizontal">
                 <materialDesign:PackIcon Kind="FolderOutline" VerticalAlignment="Center" FontSize="18"/>
@@ -32,7 +39,8 @@
                     FontSize="18" Height="72"
                     materialDesign:HintAssist.Hint="Input new item title here"
                     Text="{Binding Path=Name, Mode=OneWay}"
-                    Initialized="NewItem_OnInitialized" LostFocus="NewItem_OnLostFocus" KeyDown="NewItem_OnKeyDown"/>
+                    Initialized="NewItem_OnInitialized" LostFocus="NewItem_OnLostFocus" KeyDown="NewItem_OnKeyDown">
+                </TextBox>
             </StackPanel>
         </DataTemplate>
 
@@ -49,23 +57,46 @@
         </DataTemplate>
 
         <DataTemplate x:Key="FileView">
-            <TextBox Text ="{Binding Path=Content, Mode=OneWay}" FontSize="14" IsReadOnly="True" />
+            <controls:PdfViewer PdfPath="{Binding Path=Name}"/>
         </DataTemplate>
     </Window.Resources>
 
     <StackPanel>
         <Grid Height="50" VerticalAlignment="Top" Background="#FF4572A0">
-            <Button Name="Back" Background="{x:Null}" BorderBrush="{x:Null}" HorizontalAlignment="Left" Margin="10 0" IsEnabled="False" Click="Back_OnClick">
+            <Button Name="Back" Background="{x:Null}" BorderBrush="{x:Null}" HorizontalAlignment="Left" Margin="10 0"
+                    Click="Back_OnClick" Command="{Binding BackCommand}">
                 <materialDesign:PackIcon Kind="ArrowBack" Width="25" Height="25"/>
             </Button>
+
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="10 0">
-                <Button Name ="Add" Background="{x:Null}" BorderBrush="{x:Null}" Click="Add_OnClick">
-                    <materialDesign:PackIcon Kind="Add"/>
+                <Border Padding="5 0 5 0" CornerRadius="5" Height="35" Margin="5 0"
+                        BorderBrush="SteelBlue" BorderThickness="2">
+                    <TextBox Name="SearchBox" Width="350" VerticalAlignment="Center" Height="35"
+                             materialDesign:TextFieldAssist.DecorationVisibility="Hidden"
+                             Foreground="DarkGray" FontSize="18" VerticalContentAlignment="Center"
+                             MaxLength="50">
+                        <TextBox.InputBindings>
+                            <KeyBinding Key="Enter" Command=""></KeyBinding>
+                        </TextBox.InputBindings>
+                    </TextBox>
+                </Border>
+
+                <Button Name ="Search" Background="{x:Null}" BorderBrush="{x:Null}"
+                        Command="{Binding SearchCommand}" CommandParameter="{Binding Text, ElementName=SearchBox}">
+                    <materialDesign:PackIcon Kind="Search"  Width="20" Height="20"/>
                 </Button>
-                <Button Name ="Delete"  Background="{x:Null}" BorderBrush="{x:Null}" Click="Delete_OnClick">
-                    <materialDesign:PackIcon Kind="Delete"/>
+
+                <Button Name ="Add" Background="{x:Null}" BorderBrush="{x:Null}"
+                        Command="{Binding AddCommand}">
+                    <materialDesign:PackIcon Kind="Add" Width="20" Height="20"/>
+                </Button>
+
+                <Button Name ="Delete"  Background="{x:Null}" BorderBrush="{x:Null}"
+                        Command="{Binding DeleteCommand}">
+                    <materialDesign:PackIcon Kind="Delete" Width="20" Height="20"/>
                 </Button>
             </StackPanel>
+
             <TextBlock Text="StudyFiles" HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="White" FontSize="18"/>
         </Grid>
 

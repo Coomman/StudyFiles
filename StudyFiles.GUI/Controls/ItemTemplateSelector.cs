@@ -1,9 +1,10 @@
 ﻿using System.Windows;
 using System.Windows.Controls;
 using StudyFiles.DTO;
+
 // ReSharper disable PossibleNullReferenceException
 
-namespace StudyFiles.GUI
+namespace StudyFiles.GUI.Controls
 {
     public class ItemTemplateSelector : DataTemplateSelector
     {
@@ -11,13 +12,15 @@ namespace StudyFiles.GUI
         {
             var ui = container as FrameworkElement;
 
-            return item switch
+            var template = item switch
             {
-                NullDTO _ => (ui.FindResource("NullObject") as DataTemplate),
-                FileDTO _ => (ui.FindResource("File") as DataTemplate),
-                FileViewDTO _ => (ui.FindResource("FileView") as DataTemplate),
-                _ => (ui.FindResource("RealItem") as DataTemplate)
+                NullDTO _ => "NullObject",
+                FileDTO _ => "File",
+                FileViewDTO _ => "FileView",
+                _ => "RealItem"
             };
+
+            return ui.FindResource(template) as DataTemplate;
         }
     }
 }

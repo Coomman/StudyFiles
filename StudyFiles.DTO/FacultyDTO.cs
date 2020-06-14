@@ -4,11 +4,11 @@ namespace StudyFiles.DTO
 {
     public class FacultyDTO : IEntityDTO
     {
-        public Guid ID { get; }
+        public int ID { get; }
         public string Name { get; }
-        public Guid UniversityID { get; }
+        public int UniversityID { get; }
 
-        public FacultyDTO(Guid id, string name, Guid universityID)
+        public FacultyDTO(int id, string name, int universityID)
         {
             ID = id;
             Name = name;

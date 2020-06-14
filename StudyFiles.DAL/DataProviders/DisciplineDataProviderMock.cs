@@ -7,26 +7,26 @@ namespace StudyFiles.DAL.DataProviders
 {
     public static class DisciplineDataProviderMock
     {
+        private static int NextID { get; set; } = 4;
+
         private static readonly List<DisciplineDTO> Disciplines = new List<DisciplineDTO>
         {
-            new DisciplineDTO(Guid.Parse("abecf0cc-ce2c-4667-9a2c-14bffe36bd7e"), "Discrete Math",
-                Guid.Parse("b4971e8a-6724-4650-b12f-c414a6f0e292")),
-
-            new DisciplineDTO(
-            Guid.Parse("9489b3d7-dbfd-4d7d-b44a-02e7c93cd160"), "Algorithms and Data Structures",
-                Guid.Parse("b4971e8a-6724-4650-b12f-c414a6f0e292")),
-
-            new DisciplineDTO (Guid.Parse("7f700f22-eefc-4666-9964-e6470e8d9ab0"), "Linear Algebra",
-                 Guid.Parse("b4971e8a-6724-4650-b12f-c414a6f0e292"))
+            new DisciplineDTO(1, "Discrete Math", 1),
+            new DisciplineDTO(2, "Algorithms and Data Structures", 1),
+            new DisciplineDTO (3, "Linear Algebra", 1)
         };
 
-        public static List<DisciplineDTO> GetDisciplines(Guid facultyID)
+        public static List<DisciplineDTO> GetDisciplines(int facultyID)
         {
             return Disciplines.Where(d => d.FacultyID == facultyID).ToList();
         }
-        public static void AddDiscipline(DisciplineDTO discipline)
+        public static IEntityDTO AddDiscipline(string name, int facultyID)
         {
+            var discipline = new DisciplineDTO(NextID++, name, facultyID);
+
             Disciplines.Add(discipline);
+
+            return discipline;
         }
     }
 }

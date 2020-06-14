@@ -1,9 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.IO;
+using System.Linq;
 using System.Text;
 using Spire.Pdf;
-using Xceed.Words.NET;
+using Spire.Pdf.General.Find;
+using Spire.Pdf.Graphics;
 
 namespace StudyFiles.DAL.DataProviders
 {
@@ -41,8 +44,36 @@ namespace StudyFiles.DAL.DataProviders
         }
         private static string ReadDocs(string filePath)
         {
-            using var wordDocument = DocX.Load(filePath);
-            return wordDocument.Text;
+            //using var wordDocument = DocX.Load(filePath);
+            //return wordDocument.Text;
+
+            return null;
+        }
+
+        public static List<(int pageNum, List<PointF>)> PdfSearch(string filePath, string searchQuery)
+        {
+            var doc = new PdfDocument(filePath);
+
+            //return doc.Pages
+            //    .AsParallel()
+            //    .Cast<PdfPageBase>()
+            //    .Select((page, pageNum) => (pageNum, page.FindText(searchQuery, TextFindParameter.IgnoreCase).Finds
+            //        .AsParallel()
+            //        .SelectMany(entry => entry.Positions)
+            //        .ToList()))
+            //    .ToList();
+
+            doc.Pages
+                .AsParallel()
+                .Cast<PdfPageBase>()
+                .ForAll(page => page.FindText(searchQuery, TextFindParameter.IgnoreCase).Finds
+                    .AsParallel()
+                    .ForAll(entry => entry.ApplyHighLight()));
+
+
+            var image = doc.SaveAsImage(0, PdfImageType.Bitmap);
+
+            return null;
         }
     }
 }

@@ -2,8 +2,6 @@
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
-using Microsoft.Win32;
-using StudyFiles.DTO;
 
 // ReSharper disable PossibleNullReferenceException
 
@@ -23,45 +21,11 @@ namespace StudyFiles.GUI
             DataContext = new ApplicationViewModel();
         }
 
-        private void Add_OnClick(object sender, RoutedEventArgs e)
-        {
-            var vm = DataContext as ApplicationViewModel;
-
-            if (_depth != 4)
-            {
-                vm.Models.Add(new NullDTO());
-                return;
-            }
-
-            var fd = new OpenFileDialog
-            {
-                Title = "Select a file",
-
-                Filter = "PDF files (*.pdf)|*.pdf|" +
-                         "Microsoft Word (*.doc;*.docx)|*.doc;*.docx|" +
-                         "Text files (*.txt)|*.txt" 
-            };
-
-            if (fd.ShowDialog() == true)
-                vm.AddItem(fd.FileName);
-        }
-
-        private void Delete_OnClick(object sender, RoutedEventArgs e)
-        {
-
-        }
-
+        // Otherwise mouse double click is not working
         private void Back_OnClick(object sender, RoutedEventArgs e)
         {
-            if (_depth == 1)
-                Back.IsEnabled = false;
-
-            var vm = DataContext as ApplicationViewModel;
-            vm.GetPrevItemList();
-
             _depth--;
         }
-            
         private void Table_OnItemDoubleClick(object sender, MouseButtonEventArgs mouseButtonEventArgs)
         {
             if (mouseButtonEventArgs.ChangedButton != MouseButton.Left)
@@ -69,25 +33,25 @@ namespace StudyFiles.GUI
 
             var vm = DataContext as ApplicationViewModel;
 
-            if (_depth == 4)
+            if (_depth == 5)
+                return;
+
+            _depth++;
+
+            if (_depth == 5)
             {
                 vm.ShowFile();
-
-                _depth++;
                 return;
             }
 
             vm.GetNextItemList();
-
-            _depth++;
             Back.IsEnabled = true;
         }
 
         private void NewItem_OnInitialized(object? sender, EventArgs e)
         {
-            var textBox = sender as TextBox;
-
-            textBox.Focus();
+            if(sender is TextBox textBox)
+                textBox.Focus();
         }
         private void NewItem_OnLostFocus(object sender, RoutedEventArgs e)
         {

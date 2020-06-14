@@ -6,19 +6,25 @@ namespace StudyFiles.DAL.DataProviders
 {
     public static class UniversityDataProviderMock
     {
+        private static int NextID { get; set; } = 3;
+
         private static readonly List<UniversityDTO> Universities = new List<UniversityDTO>
         {
-            new UniversityDTO (Guid.Parse("1bdc0e42-b2b4-4346-966b-2f72b28017d8"), "ITMO"),
-            new UniversityDTO (Guid.Parse("1bd93581-927c-4eed-9566-57885f96399c"), "Polytech")
+            new UniversityDTO (1, "ITMO"),
+            new UniversityDTO (2, "Polytech")
         };
 
         public static List<UniversityDTO> GetUniversities()
         {
             return Universities;
         }
-        public static void AddUniversity(UniversityDTO university)
+        public static IEntityDTO AddUniversity(string name)
         {
-            Universities.Add(university);
+            var uni = new UniversityDTO(NextID++, name);
+
+            Universities.Add(uni);
+
+            return uni;
         }
     }
 }

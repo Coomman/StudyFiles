@@ -4,14 +4,12 @@ namespace StudyFiles.DTO
 {
     public class FileViewDTO : IEntityDTO
     {
-        public Guid ID { get; }
+        public int ID { get; }
         public string Name { get; }
 
-        public string Content { get; }
-
-        public FileViewDTO(string content)
+        public FileViewDTO(string path)
         {
-            Content = content;
+            Name = path;
         }
     }
 }
