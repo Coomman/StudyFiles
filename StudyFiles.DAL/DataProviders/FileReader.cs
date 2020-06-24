@@ -50,9 +50,15 @@ namespace StudyFiles.DAL.DataProviders
             return null;
         }
 
-        public static List<(int pageNum, List<PointF>)> PdfSearch(string filePath, string searchQuery)
+        public static bool PdfSearch(string filePath, string searchQuery)
         {
             var doc = new PdfDocument(filePath);
+
+            return doc.Pages
+                .AsParallel()
+                .Cast<PdfPageBase>()
+                .Select(page => page.ExtractText().Contains(searchQuery, StringComparison.InvariantCultureIgnoreCase))
+                .Any();
 
             //return doc.Pages
             //    .AsParallel()
@@ -63,17 +69,17 @@ namespace StudyFiles.DAL.DataProviders
             //        .ToList()))
             //    .ToList();
 
-            doc.Pages
-                .AsParallel()
-                .Cast<PdfPageBase>()
-                .ForAll(page => page.FindText(searchQuery, TextFindParameter.IgnoreCase).Finds
-                    .AsParallel()
-                    .ForAll(entry => entry.ApplyHighLight()));
+            //doc.Pages
+            //    .AsParallel()
+            //    .Cast<PdfPageBase>()
+            //    .ForAll(page => page.FindText(searchQuery, TextFindParameter.IgnoreCase).Finds
+            //        .AsParallel()
+            //        .ForAll(entry => entry.ApplyHighLight()));
 
 
-            var image = doc.SaveAsImage(0, PdfImageType.Bitmap);
+            //var image = doc.SaveAsImage(0, PdfImageType.Bitmap);
 
-            return null;
+            //return null;
         }
     }
 }

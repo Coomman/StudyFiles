@@ -1,7 +1,6 @@
-﻿using System;
-using System.Collections.ObjectModel;
+﻿using System.Linq;
 using System.ComponentModel;
-using System.Linq;
+using System.Collections.ObjectModel;
 using System.Runtime.CompilerServices;
 using System.Windows.Input;
 using Microsoft.VisualStudio.PlatformUI;
@@ -111,7 +110,7 @@ namespace StudyFiles.GUI
             => new DelegateCommand(obj => DeleteItem(), 
                 obj => SelectedModel != null && Level != 5);
         public ICommand SearchCommand
-            => new DelegateCommand(obj => _supplier.SearchFiles(_catalog.Count, obj.ToString()));
+            => new DelegateCommand(obj => _supplier.FindFiles(_catalog.Count, obj.ToString()));
 
         public ICommand BackCommand
             => new DelegateCommand(obj => GetPrevItemList(), 

@@ -26,18 +26,37 @@ namespace StudyFiles.DAL.DataProviders
         public static IEnumerable<FileDTO> GetFiles(DirectoryInfo dir, int courseId)
         {
             return dir.GetFiles()
-                .Select(file => new FileDTO(0, file.Name, ByteSizeToString(file.Length), courseId, 
-                    file.CreationTime.ToString("MM/dd/yyyy h:mm")));
+                .Select(fileInfo => GetFileDTO(fileInfo, courseId));
         }
 
         public static FileDTO UploadFile(DirectoryInfo dir, int courseId, string filePath)
         {
             var fileInfo = new FileInfo(filePath);
 
-            File.Copy(filePath, Path.Combine(dir.FullName, fileInfo.Name));
+            var destPath = Path.Combine(dir.FullName, fileInfo.Name);
 
-            return new FileDTO(0, fileInfo.Name, ByteSizeToString(fileInfo.Length),
-                courseId, fileInfo.CreationTimeUtc.ToString("MM/dd/yyyy h:mm"));
+            File.Copy(filePath, destPath);
+
+            return GetFileDTO(new FileInfo(destPath), courseId);
+        }
+
+        public static FileDTO GetFileDTO (FileInfo fileInfo, int courseId)
+        {
+            return new FileDTO(-1, fileInfo.Name, ByteSizeToString(fileInfo.Length), courseId,
+                fileInfo.CreationTimeUtc.ToString("MM/dd/yyyy h:mm"));
+        }
+        public static SearchResultDTO GetSearchResultDTO(FileInfo fileInfo)
+        {
+            var courseId = int.Parse(fileInfo.Directory.Name);
+
+            return new SearchResultDTO(GetFileDTO(fileInfo, courseId), GetBreadCrunch(courseId));
+        }
+
+        private static string GetBreadCrunch(int courseId)
+        {
+            //TODO GetPathFromDB
+
+            return "";
         }
     }
 }

@@ -2,6 +2,7 @@
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using System.Windows.Media;
 
 // ReSharper disable PossibleNullReferenceException
 
@@ -67,6 +68,21 @@ namespace StudyFiles.GUI
         {
             if (e.Key == Key.Enter)
                 Table.Focus();
+        }
+
+        private void SearchBox_OnMouseEnter(object sender, MouseEventArgs e)
+        {
+            SearchBorder.Background = Brushes.AliceBlue;
+        }
+        private void SearchBox_OnMouseLeave(object sender, MouseEventArgs e)
+        {
+            if (!SearchBox.IsFocused)
+                SearchBorder.Background = Brushes.Transparent;
+        }
+        private void SearchBox_OnLostFocus(object sender, RoutedEventArgs e)
+        {
+            if(SearchBox.Text.Length == 0)
+                SearchBorder.Background = Brushes.Transparent;
         }
     }
 }

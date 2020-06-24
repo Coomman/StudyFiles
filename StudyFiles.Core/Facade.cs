@@ -1,27 +1,28 @@
 ﻿using System;
 using System.IO;
+using System.Linq;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+
 using StudyFiles.DTO;
 using StudyFiles.DAL.DataProviders;
 
 namespace StudyFiles.Core
 {
-    // TODO: 2) Add SearchFiles correct implementation
+    // TODO: 2) Add FindFiles implementation (To ViewModel)
     // 3) Add Search Result View (both for file and files)
     // 4) File conversion when adding
     // 5) Fix file view
-    // 6) Connect search with BL
+    // 6) Connect search with BL +-
     // 7) Fix file preview displaying +--
 
     // 8*) Switch to DataGrid
 
     public class Facade
     {
-        private int _curUniversityID;
-        private int _curFacultyID;
-        private int _curDisciplineID;
-        private int _curCourseID;
+        private enum Entity { University, Faculty, Discipline, Course };
+
+        private readonly int[] ID = new int[4];
 
         private const string StoragePath = @"res\";
 
@@ -48,8 +49,7 @@ namespace StudyFiles.Core
 
         private DirectoryInfo GetDirectory()
         {
-            var path = Path.Combine(StoragePath,
-                _curUniversityID.ToString(), _curFacultyID.ToString(), _curDisciplineID.ToString(), _curCourseID.ToString());
+            var path = Path.Combine(StoragePath, ID[0].ToString(), ID[1].ToString(), ID[2].ToString(), ID[3].ToString());
 
             return Directory.CreateDirectory(path);
         }
@@ -69,23 +69,22 @@ namespace StudyFiles.Core
         }
         private IEnumerable<IEntityDTO> GetFaculties(int universityID)
         {
-            _curUniversityID = universityID;
-            return FacultyDataProviderMock.GetFaculties(_curUniversityID);
+            ID[(int)Entity.University] = universityID;
+            return FacultyDataProviderMock.GetFaculties(universityID);
         }
         private IEnumerable<IEntityDTO> GetDisciplines(int facultyID)
         {
-            _curFacultyID = facultyID;
-            return DisciplineDataProviderMock.GetDisciplines(_curFacultyID);
+            ID[(int)Entity.Faculty] = facultyID;
+            return DisciplineDataProviderMock.GetDisciplines(facultyID);
         }
         private IEnumerable<IEntityDTO> GetCourses(int disciplineID)
         {
-            _curDisciplineID = disciplineID;
-            return CourseDataProviderMock.GetCourses(_curDisciplineID);
+            ID[(int)Entity.Discipline] = disciplineID;
+            return CourseDataProviderMock.GetCourses(disciplineID);
         }
-
         private IEnumerable<IEntityDTO> GetFiles(int courseID)
         {
-            _curCourseID = courseID;
+            ID[(int)Entity.Course] = courseID;
             return FileDataProvider.GetFiles(GetDirectory(), courseID);
         }
 
@@ -103,14 +102,14 @@ namespace StudyFiles.Core
         private IEntityDTO AddUniversity(string universityName)
             => UniversityDataProviderMock.AddUniversity(universityName);
         private IEntityDTO AddFaculty(string facultyName)
-            => FacultyDataProviderMock.AddFaculty(facultyName, _curUniversityID);
+            => FacultyDataProviderMock.AddFaculty(facultyName, ID[(int) Entity.University]);
         private IEntityDTO AddDiscipline(string disciplineName)
-            => DisciplineDataProviderMock.AddDiscipline(disciplineName, _curFacultyID);
+            => DisciplineDataProviderMock.AddDiscipline(disciplineName, ID[(int) Entity.Faculty]);
         private IEntityDTO AddCourse(string teacherName)
-            => CourseDataProviderMock.AddCourse(teacherName, _curDisciplineID);
+            => CourseDataProviderMock.AddCourse(teacherName, ID[(int) Entity.Discipline]);
 
         private IEntityDTO UploadFile(string filePath)
-            => FileDataProvider.UploadFile(GetDirectory(), _curCourseID, filePath);
+            => FileDataProvider.UploadFile(GetDirectory(), ID[(int) Entity.Course], filePath);
 
         #endregion
 
@@ -122,46 +121,18 @@ namespace StudyFiles.Core
             //return FileReader.ReadFile(new FileInfo(filePath));
         }
 
-        public ObservableCollection<IEntityDTO> SearchFiles(int depth, string searchQuery)
+        public IEnumerable<IEntityDTO> FindFiles(int depth, string searchQuery)
         {
             var searchPath = StoragePath.Clone() as string;
 
-            if (depth > 0)
-                searchPath += $@"{_curUniversityID}";
+            for (int i = 0; i < depth; i++)
+                Path.Combine(searchPath, ID[i].ToString());
 
-            if (depth > 1)
-                searchPath += $@"\{_curFacultyID}";
-
-            if (depth > 2)
-                searchPath += $@"\{_curDisciplineID}";
-
-            if (depth > 3)
-                searchPath += $@"\{_curCourseID}";
-
-            return null;
-            //return Directory.GetFiles(searchPath, "*.*", SearchOption.AllDirectories)
+            return Directory.GetFiles(searchPath, "*.*", SearchOption.AllDirectories)
+                .AsParallel()
+                .Where(filePath => FileReader.PdfSearch(filePath, searchQuery))
+                .Select(filePath => FileDataProvider.GetSearchResultDTO(new FileInfo(filePath)))
+                .AsEnumerable();
         }
-
-
-
-        //public List<string> SearchFiles(int depth, string query)
-        //{
-        //    var searchPath = StoragePath.Clone() as string;
-
-        //    if (depth > 0)
-        //        searchPath += $@"{_curUniversityID}";
-
-        //    if (depth > 1)
-        //        searchPath += $@"\{_curFacultyID}";
-
-        //    if (depth > 2)
-        //        searchPath += $@"\{_curDisciplineID}";
-
-        //    if (depth > 3)
-        //        searchPath += $@"\{_curCourseID}";
-
-        //    return Directory.GetFiles(searchPath, "*.*", SearchOption.AllDirectories)
-        //        .Where(f => File.ReadAllText(f).Contains(query)).ToList();
-        //}
     }
 }

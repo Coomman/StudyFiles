@@ -69,12 +69,13 @@
             </Button>
 
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="10 0">
-                <Border Padding="5 0 5 0" CornerRadius="5" Height="35" Margin="5 0"
+                <Border Name="SearchBorder" Padding="5 0 5 0" CornerRadius="5" Height="35" Margin="5 0"
                         BorderBrush="SteelBlue" BorderThickness="2">
                     <TextBox Name="SearchBox" Width="350" VerticalAlignment="Center" Height="35"
                              materialDesign:TextFieldAssist.DecorationVisibility="Hidden"
-                             Foreground="DarkGray" FontSize="18" VerticalContentAlignment="Center"
-                             MaxLength="50">
+                             Foreground="Black" FontSize="18" VerticalContentAlignment="Center"
+                             MaxLength="50" 
+                             MouseEnter="SearchBox_OnMouseEnter" MouseLeave="SearchBox_OnMouseLeave" LostFocus="SearchBox_OnLostFocus">
                         <TextBox.InputBindings>
                             <KeyBinding Key="Enter" Command=""></KeyBinding>
                         </TextBox.InputBindings>
