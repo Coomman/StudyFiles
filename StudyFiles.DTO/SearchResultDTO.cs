@@ -5,7 +5,7 @@
         private readonly FileDTO _fileInfo;
 
         public int ID => _fileInfo.ID;
-        public string Name => _fileInfo.Name;
+        public string InnerText => _fileInfo.InnerText;
         public string Size => _fileInfo.Size;
         public int CourseID => _fileInfo.CourseID;
         public string CreationTime => _fileInfo.CreationTime;

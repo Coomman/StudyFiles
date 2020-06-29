@@ -1,64 +1,22 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Drawing;
-using System.IO;
 using System.Linq;
-using System.Text;
+
 using Spire.Pdf;
-using Spire.Pdf.General.Find;
-using Spire.Pdf.Graphics;
 
 namespace StudyFiles.DAL.DataProviders
 {
     public static class FileReader
     {
-        private static readonly Dictionary<string, Func<string, string>> ReadCmd = new Dictionary<string, Func<string, string>>
-        {
-            [".txt"] = ReadTxt,
-            [".pdf"] = ReadPdf,
-            [".doc"] = ReadDocs,
-            [".docx"] = ReadDocs
-        };
-
-        public static string ReadFile(FileInfo fileInfo)
-        {
-            return ReadCmd[fileInfo.Extension].Invoke(fileInfo.FullName);
-        }
-
-        private static string ReadTxt(string filePath)
-        {
-            return File.ReadAllText(filePath);
-        }
-        private static string ReadPdf(string filePath)
-        {
-            var doc = new PdfDocument(filePath);
-
-            var text = new StringBuilder();
-
-            foreach (PdfPageBase page in doc.Pages)
-            {
-                text.Append(page.ExtractText());
-            }
-
-            return text.ToString();
-        }
-        private static string ReadDocs(string filePath)
-        {
-            //using var wordDocument = DocX.Load(filePath);
-            //return wordDocument.Text;
-
-            return null;
-        }
-
         public static bool PdfSearch(string filePath, string searchQuery)
         {
-            var doc = new PdfDocument(filePath);
+            using var doc = new PdfDocument(filePath);
 
             return doc.Pages
-                .AsParallel()
                 .Cast<PdfPageBase>()
-                .Select(page => page.ExtractText().Contains(searchQuery, StringComparison.InvariantCultureIgnoreCase))
-                .Any();
+                .Select(page => page.ExtractText())
+                .AsParallel()
+                .Any(pageText => pageText.Contains(searchQuery, StringComparison.InvariantCultureIgnoreCase));
 
             //return doc.Pages
             //    .AsParallel()
@@ -80,6 +38,18 @@ namespace StudyFiles.DAL.DataProviders
             //var image = doc.SaveAsImage(0, PdfImageType.Bitmap);
 
             //return null;
+        }
+
+        public static Image[] PdfHighlight(string filePath, string searchQuery)
+        {
+            using var doc = new PdfDocument(filePath);
+
+            var images = new Image[doc.Pages.Count];
+
+            for (int i = 0; i < doc.Pages.Count; i++)
+                images[i] = doc.SaveAsImage(i);
+
+            return images;
         }
     }
 }

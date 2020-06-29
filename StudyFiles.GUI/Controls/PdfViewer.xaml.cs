@@ -1,11 +1,16 @@
 ﻿using System;
 using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
+using System.Collections.Generic;
+
 using System.Windows;
+using System.Windows.Media;
+using System.Windows.Interop;
 using System.Windows.Controls;
 using System.Windows.Media.Imaging;
+using System.Windows.Threading;
 using Windows.Data.Pdf;
-using Windows.Storage;
 using Windows.Storage.Streams;
 
 namespace StudyFiles.GUI.Controls
@@ -18,32 +23,40 @@ namespace StudyFiles.GUI.Controls
 
         #region Bindable Properties
 
-        public string PdfPath
+        public IList<System.Drawing.Image> ImageSource
         {
-            get => (string) GetValue(PdfPathProperty);
-            set => SetValue(PdfPathProperty, value);
+            get => (IList<System.Drawing.Image>) GetValue(ImageSourceProperty);
+            set => SetValue(ImageSourceProperty, value);
         }
 
-        // Using a DependencyProperty as the backing store for PdfPath.  This enables animation, styling, binding, etc...
-        public static readonly DependencyProperty PdfPathProperty =
-            DependencyProperty.Register("PdfPath", typeof(string), typeof(PdfViewer),
-                new PropertyMetadata(null, propertyChangedCallback: OnPdfPathChanged));
+        // Using a DependencyProperty as the backing store for ImageSource.  This enables animation, styling, binding, etc...
+        public static readonly DependencyProperty ImageSourceProperty =
+            DependencyProperty.Register("ImageSource", typeof(IList<System.Drawing.Image>), typeof(PdfViewer),
+                new PropertyMetadata(null, propertyChangedCallback: OnImageSourceChanged));
 
-        private static void OnPdfPathChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        private static void OnImageSourceChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
             var pdfDrawer = (PdfViewer) d;
 
-            if (string.IsNullOrEmpty(pdfDrawer.PdfPath))
-                return;
+            var items = pdfDrawer.PagesContainer.Items;
+            items.Clear();
 
-            var path = Path.GetFullPath(pdfDrawer.PdfPath);
+            pdfDrawer.ImageSource
+                .Select(ConvertImage)
+                .ToList()
+                .ForEach(img => items.Add(img));
 
-            StorageFile.GetFileFromPathAsync(path).AsTask()
-                //load pdf document on background thread
-                .ContinueWith(task => PdfDocument.LoadFromFileAsync(task.Result).AsTask()).Unwrap()
-                //display on UI Thread
-                .ContinueWith(task => PdfToImages(pdfDrawer, task.Result),
-                    TaskScheduler.FromCurrentSynchronizationContext());
+            //if (string.IsNullOrEmpty(pdfDrawer.ImageSource))
+            //    return;
+
+            //var path = Path.GetFullPath(pdfDrawer.ImageSource);
+
+            //StorageFile.GetFileFromPathAsync(path).AsTask()
+            //    //load pdf document on background thread
+            //    .ContinueWith(task => PdfDocument.LoadFromFileAsync(task.Result).AsTask()).Unwrap()
+            //    //display on UI Thread
+            //    .ContinueWith(task => PdfToImages(pdfDrawer, task.Result),
+            //        TaskScheduler.FromCurrentSynchronizationContext());
         }
 
         #endregion
@@ -52,6 +65,23 @@ namespace StudyFiles.GUI.Controls
         public PdfViewer()
         {
             InitializeComponent();
+        }
+
+        private static Image ConvertImage(System.Drawing.Image image)
+        {
+            var img = new Image();
+
+            var bmp = new System.Drawing.Bitmap(image);
+            IntPtr hBitmap = bmp.GetHbitmap();
+            ImageSource wpfBitmap = Imaging.CreateBitmapSourceFromHBitmap(
+                hBitmap, IntPtr.Zero, Int32Rect.Empty, BitmapSizeOptions.FromEmptyOptions());
+
+            img.Source = wpfBitmap;
+            img.Width = 810;
+            img.Height = 1110;
+            img.Stretch = System.Windows.Media.Stretch.Fill;
+
+            return img;
         }
 
         private static async Task PdfToImages(PdfViewer pdfViewer, PdfDocument pdfDoc)

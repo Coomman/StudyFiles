@@ -5,7 +5,7 @@ namespace StudyFiles.DTO
     public class FileDTO : IEntityDTO
     {
         public int ID { get; }
-        public string Name { get; }
+        public string InnerText { get; }
         public string Size { get; }
         public int CourseID { get; }
         public string CreationTime { get; }
@@ -13,7 +13,7 @@ namespace StudyFiles.DTO
         public FileDTO(int id, string name, string size, int courseID, string creationTime)
         {
             ID = id;
-            Name = name;
+            InnerText = name;
             Size = size;
             CourseID = courseID;
             CreationTime = creationTime;

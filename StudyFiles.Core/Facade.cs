@@ -2,14 +2,12 @@
 using System.IO;
 using System.Linq;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 
 using StudyFiles.DTO;
 using StudyFiles.DAL.DataProviders;
 
 namespace StudyFiles.Core
 {
-    // TODO: 2) Add FindFiles implementation (To ViewModel)
     // 3) Add Search Result View (both for file and files)
     // 4) File conversion when adding
     // 5) Fix file view
@@ -22,7 +20,7 @@ namespace StudyFiles.Core
     {
         private enum Entity { University, Faculty, Discipline, Course };
 
-        private readonly int[] ID = new int[4];
+        private readonly int[] _id = new int[4];
 
         private const string StoragePath = @"res\";
 
@@ -49,7 +47,7 @@ namespace StudyFiles.Core
 
         private DirectoryInfo GetDirectory()
         {
-            var path = Path.Combine(StoragePath, ID[0].ToString(), ID[1].ToString(), ID[2].ToString(), ID[3].ToString());
+            var path = Path.Combine(StoragePath, _id[0].ToString(), _id[1].ToString(), _id[2].ToString(), _id[3].ToString());
 
             return Directory.CreateDirectory(path);
         }
@@ -58,9 +56,14 @@ namespace StudyFiles.Core
 
         private readonly Dictionary<int, Func<int, IEnumerable<IEntityDTO>>> _getCmd;
 
-        public ObservableCollection<IEntityDTO> GetModelsList(int depth, int id = -1)
+        public List<IEntityDTO> GetModelsList(int depth, int id = -1)
         {
-            return new ObservableCollection<IEntityDTO>(_getCmd[depth].Invoke(id));
+            var result = _getCmd[depth].Invoke(id).ToList();
+
+            if(!result.Any())
+                result.Add(new NotFoundDTO());
+
+            return result;
         }
 
         private IEnumerable<IEntityDTO> GetUniversities()
@@ -69,22 +72,22 @@ namespace StudyFiles.Core
         }
         private IEnumerable<IEntityDTO> GetFaculties(int universityID)
         {
-            ID[(int)Entity.University] = universityID;
+            _id[(int)Entity.University] = universityID;
             return FacultyDataProviderMock.GetFaculties(universityID);
         }
         private IEnumerable<IEntityDTO> GetDisciplines(int facultyID)
         {
-            ID[(int)Entity.Faculty] = facultyID;
+            _id[(int)Entity.Faculty] = facultyID;
             return DisciplineDataProviderMock.GetDisciplines(facultyID);
         }
         private IEnumerable<IEntityDTO> GetCourses(int disciplineID)
         {
-            ID[(int)Entity.Discipline] = disciplineID;
+            _id[(int)Entity.Discipline] = disciplineID;
             return CourseDataProviderMock.GetCourses(disciplineID);
         }
         private IEnumerable<IEntityDTO> GetFiles(int courseID)
         {
-            ID[(int)Entity.Course] = courseID;
+            _id[(int)Entity.Course] = courseID;
             return FileDataProvider.GetFiles(GetDirectory(), courseID);
         }
 
@@ -102,37 +105,35 @@ namespace StudyFiles.Core
         private IEntityDTO AddUniversity(string universityName)
             => UniversityDataProviderMock.AddUniversity(universityName);
         private IEntityDTO AddFaculty(string facultyName)
-            => FacultyDataProviderMock.AddFaculty(facultyName, ID[(int) Entity.University]);
+            => FacultyDataProviderMock.AddFaculty(facultyName, _id[(int) Entity.University]);
         private IEntityDTO AddDiscipline(string disciplineName)
-            => DisciplineDataProviderMock.AddDiscipline(disciplineName, ID[(int) Entity.Faculty]);
+            => DisciplineDataProviderMock.AddDiscipline(disciplineName, _id[(int) Entity.Faculty]);
         private IEntityDTO AddCourse(string teacherName)
-            => CourseDataProviderMock.AddCourse(teacherName, ID[(int) Entity.Discipline]);
+            => CourseDataProviderMock.AddCourse(teacherName, _id[(int) Entity.Discipline]);
 
         private IEntityDTO UploadFile(string filePath)
-            => FileDataProvider.UploadFile(GetDirectory(), ID[(int) Entity.Course], filePath);
+            => FileDataProvider.UploadFile(GetDirectory(), _id[(int) Entity.Course], filePath);
 
         #endregion
-
-        public FileViewDTO ReadFile(string fileName)
-        {
-            var filePath = Path.Combine(GetDirectory().FullName, fileName);
-            return new FileViewDTO(filePath);
-
-            //return FileReader.ReadFile(new FileInfo(filePath));
-        }
 
         public IEnumerable<IEntityDTO> FindFiles(int depth, string searchQuery)
         {
             var searchPath = StoragePath.Clone() as string;
 
             for (int i = 0; i < depth; i++)
-                Path.Combine(searchPath, ID[i].ToString());
+                Path.Combine(searchPath, _id[i].ToString());
 
             return Directory.GetFiles(searchPath, "*.*", SearchOption.AllDirectories)
                 .AsParallel()
                 .Where(filePath => FileReader.PdfSearch(filePath, searchQuery))
                 .Select(filePath => FileDataProvider.GetSearchResultDTO(new FileInfo(filePath)))
                 .AsEnumerable();
+        }
+
+        public FileViewDTO ReadFile(string fileName)
+        {
+            var filePath = Path.Combine(GetDirectory().FullName, fileName);
+            return new FileViewDTO(filePath, FileReader.PdfHighlight(filePath, ""));
         }
     }
 }

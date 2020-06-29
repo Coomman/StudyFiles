@@ -28,7 +28,7 @@
         <DataTemplate x:Key="RealItem">
             <StackPanel Margin="5" Orientation="Horizontal">
                 <materialDesign:PackIcon Kind="FolderOutline" VerticalAlignment="Center" FontSize="18"/>
-                <TextBlock FontSize="18" Text="{Binding Path=Name, Mode=OneWay}" VerticalAlignment="Center" Margin="5"/>
+                <TextBlock FontSize="18" Text="{Binding Path=InnerText, Mode=OneWay}" VerticalAlignment="Center" Margin="5"/>
             </StackPanel>
         </DataTemplate>
 
@@ -38,16 +38,20 @@
                     Style="{StaticResource MaterialDesignFilledTextFieldTextBox}" VerticalAlignment="Center"
                     FontSize="18" Height="72"
                     materialDesign:HintAssist.Hint="Input new item title here"
-                    Text="{Binding Path=Name, Mode=OneWay}"
+                    Text="{Binding Path=InnerText, Mode=OneWay}"
                     Initialized="NewItem_OnInitialized" LostFocus="NewItem_OnLostFocus" KeyDown="NewItem_OnKeyDown">
                 </TextBox>
             </StackPanel>
         </DataTemplate>
 
+        <DataTemplate x:Key="NoMatches">
+            <TextBlock Text="{Binding Path=InnerText}" FontSize="18"></TextBlock>
+        </DataTemplate>
+
         <DataTemplate x:Key="File">
             <DockPanel Margin="5">
                 <materialDesign:PackIcon Kind="FileOutline" FontSize="18" VerticalAlignment="Center" DockPanel.Dock="Left"/>
-                <TextBlock DockPanel.Dock="Left" FontSize="18" Text="{Binding Path=Name, Mode=OneWay}" 
+                <TextBlock DockPanel.Dock="Left" FontSize="18" Text="{Binding Path=InnerText, Mode=OneWay}" 
                            VerticalAlignment="Center" Margin="5"/>
                 <TextBlock FontSize="18" Text="{Binding Path=CreationTime, Mode=OneWay}"
                            VerticalAlignment="Center" HorizontalAlignment="Center" Margin="200, 0, 600, 0"/>
@@ -57,7 +61,7 @@
         </DataTemplate>
 
         <DataTemplate x:Key="FileView">
-            <controls:PdfViewer PdfPath="{Binding Path=Name}"/>
+            <controls:PdfViewer ImageSource="{Binding Path=Images}"/>
         </DataTemplate>
     </Window.Resources>
 

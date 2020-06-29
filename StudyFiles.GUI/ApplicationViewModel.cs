@@ -1,10 +1,12 @@
 ﻿using System.Linq;
+using System.Windows.Input;
 using System.ComponentModel;
 using System.Collections.ObjectModel;
 using System.Runtime.CompilerServices;
-using System.Windows.Input;
-using Microsoft.VisualStudio.PlatformUI;
+
 using Microsoft.Win32;
+using Microsoft.VisualStudio.PlatformUI;
+
 using StudyFiles.Core;
 using StudyFiles.DAL.DataProviders;
 using StudyFiles.DTO;
@@ -50,7 +52,7 @@ namespace StudyFiles.GUI
         {
             _catalog.Add(SelectedModel);
 
-            Models = _supplier.GetModelsList(_catalog.Count, SelectedModel.ID);
+            Models = new ObservableCollection<IEntityDTO>(_supplier.GetModelsList(Level, SelectedModel.ID));
 
             SelectedModel = null;
         }
@@ -58,11 +60,20 @@ namespace StudyFiles.GUI
         {
             _catalog.RemoveAt(Level - 1);
 
-            Models = _catalog.Any() 
-                ? _supplier.GetModelsList(Level, _catalog[^1].ID) 
-                : _supplier.GetModelsList(Level);
+            Models = new ObservableCollection<IEntityDTO>(_catalog.Any()
+                    ? _supplier.GetModelsList(Level, _catalog[^1].ID)
+                    : _supplier.GetModelsList(Level)); 
 
             SelectedModel = null;
+        }
+        public void GetSearchResult(string query)
+        {
+            var searchResult = _supplier.FindFiles(Level, query).ToList();
+
+            if(!searchResult.Any())
+                searchResult.Add(new NotFoundDTO($"No files match \"{query}\" query"));
+
+            Models = new ObservableCollection<IEntityDTO>(searchResult);
         }
 
         public void AddItem(string name)
@@ -70,7 +81,7 @@ namespace StudyFiles.GUI
             if(Level != 4)
                 Models.RemoveAt(Models.Count - 1);
 
-            Models.Add(_supplier.AddNewModel(_catalog.Count, name));
+            Models.Add(_supplier.AddNewModel(Level, name));
         }
         public void AddFile()
         {
@@ -100,7 +111,7 @@ namespace StudyFiles.GUI
         {
             _catalog.Add(SelectedModel);
 
-            Models = new ObservableCollection<IEntityDTO>(new []{ _supplier.ReadFile(SelectedModel.Name)});
+            Models = new ObservableCollection<IEntityDTO>(new []{ _supplier.ReadFile(SelectedModel.InnerText)});
         }
 
         public ICommand AddCommand
@@ -110,14 +121,13 @@ namespace StudyFiles.GUI
             => new DelegateCommand(obj => DeleteItem(), 
                 obj => SelectedModel != null && Level != 5);
         public ICommand SearchCommand
-            => new DelegateCommand(obj => _supplier.FindFiles(_catalog.Count, obj.ToString()));
+            => new DelegateCommand(obj => GetSearchResult(obj.ToString()));
 
         public ICommand BackCommand
             => new DelegateCommand(obj => GetPrevItemList(), 
                 obj => Level != 0);
         public ICommand WindowMouseClickCommand
             => new DelegateCommand(obj => SelectedModel = null);
-
 
         public event PropertyChangedEventHandler PropertyChanged;
         public void OnPropertyChanged([CallerMemberName]string prop = "")

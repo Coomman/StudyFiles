@@ -10,7 +10,7 @@ namespace StudyFiles.DAL.Mappers
         {
             return new UniversityDTO(
                 (int) dr["ID"],
-                (string) dr["Name"]);
+                (string) dr["InnerText"]);
         }
     }
 }

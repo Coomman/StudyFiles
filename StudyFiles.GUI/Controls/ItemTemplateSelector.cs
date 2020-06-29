@@ -14,6 +14,8 @@ namespace StudyFiles.GUI.Controls
 
             var template = item switch
             {
+                NotFoundDTO _ => "NoMatches",
+                SearchResultDTO _ => "File",
                 NullDTO _ => "NullObject",
                 FileDTO _ => "File",
                 FileViewDTO _ => "FileView",
