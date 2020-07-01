@@ -8,13 +8,14 @@ using StudyFiles.DAL.DataProviders;
 
 namespace StudyFiles.Core
 {
-    // 3) Add Search Result View (both for file and files)
+    //TODO
+    // 1) Add Search Result View in file
+    // 2) Add file entries fast scroll
+    // 3) Add saving pages with entries for highlighting
     // 4) File conversion when adding
-    // 5) Fix file view
-    // 6) Connect search with BL +-
-    // 7) Fix file preview displaying +--
+    // 5) Fix file preview displaying +--
 
-    // 8*) Switch to DataGrid
+    // 6*) Switch to DataGrid
 
     public class Facade
     {
@@ -68,22 +69,22 @@ namespace StudyFiles.Core
 
         private IEnumerable<IEntityDTO> GetUniversities()
         {
-            return UniversityDataProviderMock.GetUniversities();
+            return UniversityDataProvider.GetUniversities();
         }
         private IEnumerable<IEntityDTO> GetFaculties(int universityID)
         {
             _id[(int)Entity.University] = universityID;
-            return FacultyDataProviderMock.GetFaculties(universityID);
+            return FacultyDataProvider.GetFaculties(universityID);
         }
         private IEnumerable<IEntityDTO> GetDisciplines(int facultyID)
         {
             _id[(int)Entity.Faculty] = facultyID;
-            return DisciplineDataProviderMock.GetDisciplines(facultyID);
+            return DisciplineDataProvider.GetDisciplines(facultyID);
         }
         private IEnumerable<IEntityDTO> GetCourses(int disciplineID)
         {
             _id[(int)Entity.Discipline] = disciplineID;
-            return CourseDataProviderMock.GetCourses(disciplineID);
+            return CourseDataProvider.GetCourses(disciplineID);
         }
         private IEnumerable<IEntityDTO> GetFiles(int courseID)
         {
@@ -103,13 +104,13 @@ namespace StudyFiles.Core
         }
 
         private IEntityDTO AddUniversity(string universityName)
-            => UniversityDataProviderMock.AddUniversity(universityName);
+            => UniversityDataProvider.AddUniversity(universityName);
         private IEntityDTO AddFaculty(string facultyName)
-            => FacultyDataProviderMock.AddFaculty(facultyName, _id[(int) Entity.University]);
+            => FacultyDataProvider.AddFaculty(facultyName, _id[(int) Entity.University]);
         private IEntityDTO AddDiscipline(string disciplineName)
-            => DisciplineDataProviderMock.AddDiscipline(disciplineName, _id[(int) Entity.Faculty]);
+            => DisciplineDataProvider.AddDiscipline(disciplineName, _id[(int) Entity.Faculty]);
         private IEntityDTO AddCourse(string teacherName)
-            => CourseDataProviderMock.AddCourse(teacherName, _id[(int) Entity.Discipline]);
+            => CourseDataProvider.AddCourse(teacherName, _id[(int) Entity.Discipline]);
 
         private IEntityDTO UploadFile(string filePath)
             => FileDataProvider.UploadFile(GetDirectory(), _id[(int) Entity.Course], filePath);
@@ -121,7 +122,7 @@ namespace StudyFiles.Core
             var searchPath = StoragePath.Clone() as string;
 
             for (int i = 0; i < depth; i++)
-                Path.Combine(searchPath, _id[i].ToString());
+                searchPath = Path.Combine(searchPath, _id[i].ToString());
 
             return Directory.GetFiles(searchPath, "*.*", SearchOption.AllDirectories)
                 .AsParallel()
@@ -130,10 +131,13 @@ namespace StudyFiles.Core
                 .AsEnumerable();
         }
 
-        public FileViewDTO ReadFile(string fileName)
+        public FileViewDTO ReadFile(string fileName, string searchQuery = null)
         {
-            var filePath = Path.Combine(GetDirectory().FullName, fileName);
-            return new FileViewDTO(filePath, FileReader.PdfHighlight(filePath, ""));
+            var filePath = searchQuery is null
+                ? Path.Combine(GetDirectory().FullName, fileName)
+                : Path.Combine(StoragePath, fileName);
+
+            return new FileViewDTO(filePath, FileReader.GetPdfImages(filePath, searchQuery));
         }
     }
 }

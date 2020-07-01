@@ -3,6 +3,10 @@ using System.IO;
 using System.Linq;
 using System.Globalization;
 using System.Collections.Generic;
+using System.Data;
+using System.Data.SqlClient;
+using System.Runtime.InteropServices;
+using StudyFiles.DAL.Mappers;
 using StudyFiles.DTO;
 
 namespace StudyFiles.DAL.DataProviders
@@ -49,14 +53,25 @@ namespace StudyFiles.DAL.DataProviders
         {
             var courseId = int.Parse(fileInfo.Directory.Name);
 
-            return new SearchResultDTO(GetFileDTO(fileInfo, courseId), GetBreadCrunch(courseId));
+            var (path, breadCrumb) = GetBreadCrunch(courseId);
+
+            return new SearchResultDTO(GetFileDTO(fileInfo, courseId), path, breadCrumb);
         }
 
-        private static string GetBreadCrunch(int courseId)
+        private static (string path, string breadCrumb) GetBreadCrunch(int courseId)
         {
-            //TODO GetPathFromDB
+            const string query = "Select CONCAT_WS('/', U.Name, F.Name, D.Name, C.Teacher) as BreadCrumb, " +
+                                 "CONCAT_WS('\\', U.ID, F.ID, D.ID, C.ID) as Path " +
+                                 "from University as U " +
+                                 "inner join Faculty as F on(U.ID = F.UniversityID) " +
+                                 "inner join Discipline as D on(F.ID = D.FacultyID) " +
+                                 "inner join Course as C on(D.ID = C.DisciplineID) " +
+                                 "Where C.ID = @id";
+            
+            var command = new SqlCommand(query);
+            command.Parameters.Add(new SqlParameter("@id", SqlDbType.Int) {Value = courseId});
 
-            return "";
+            return DBHelper.GetItem(new PathMapper(), command);
         }
     }
 }

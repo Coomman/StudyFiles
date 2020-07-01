@@ -45,7 +45,7 @@
         </DataTemplate>
 
         <DataTemplate x:Key="NoMatches">
-            <TextBlock Text="{Binding Path=InnerText}" FontSize="18"></TextBlock>
+            <TextBlock Text="{Binding Path=InnerText}" FontSize="18" TextAlignment="Center"></TextBlock>
         </DataTemplate>
 
         <DataTemplate x:Key="File">
@@ -86,7 +86,7 @@
                     </TextBox>
                 </Border>
 
-                <Button Name ="Search" Background="{x:Null}" BorderBrush="{x:Null}"
+                <Button Name ="Search" Background="{x:Null}" BorderBrush="{x:Null}" Click="Search_OnClick"
                         Command="{Binding SearchCommand}" CommandParameter="{Binding Text, ElementName=SearchBox}">
                     <materialDesign:PackIcon Kind="Search"  Width="20" Height="20"/>
                 </Button>

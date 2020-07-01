@@ -3,6 +3,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
+using StudyFiles.DTO;
 
 // ReSharper disable PossibleNullReferenceException
 
@@ -14,6 +15,7 @@ namespace StudyFiles.GUI
     public partial class MainWindow
     {
         private int _depth;
+        private string _lastSearchQuery;
 
         public MainWindow()
         {
@@ -33,8 +35,9 @@ namespace StudyFiles.GUI
                 return;
 
             var vm = DataContext as ApplicationViewModel;
+            var listBox = sender as ListBox;
 
-            if (_depth == 5)
+            if (_depth == 5 || listBox.SelectedItem is NotFoundDTO)
                 return;
 
             _depth++;
@@ -42,6 +45,12 @@ namespace StudyFiles.GUI
             if (_depth == 5)
             {
                 vm.ShowFile();
+                return;
+            }
+
+            if (listBox.SelectedItem is SearchResultDTO)
+            {
+                vm.ShowFile(_lastSearchQuery);
                 return;
             }
 
@@ -83,6 +92,11 @@ namespace StudyFiles.GUI
         {
             if(SearchBox.Text.Length == 0)
                 SearchBorder.Background = Brushes.Transparent;
+        }
+
+        private void Search_OnClick(object sender, RoutedEventArgs e)
+        {
+            _lastSearchQuery = SearchBox.Text;
         }
     }
 }

@@ -3,6 +3,7 @@ using System.Drawing;
 using System.Linq;
 
 using Spire.Pdf;
+using Spire.Pdf.General.Find;
 
 namespace StudyFiles.DAL.DataProviders
 {
@@ -26,23 +27,25 @@ namespace StudyFiles.DAL.DataProviders
             //        .SelectMany(entry => entry.Positions)
             //        .ToList()))
             //    .ToList();
-
-            //doc.Pages
-            //    .AsParallel()
-            //    .Cast<PdfPageBase>()
-            //    .ForAll(page => page.FindText(searchQuery, TextFindParameter.IgnoreCase).Finds
-            //        .AsParallel()
-            //        .ForAll(entry => entry.ApplyHighLight()));
-
-
-            //var image = doc.SaveAsImage(0, PdfImageType.Bitmap);
-
-            //return null;
         }
 
-        public static Image[] PdfHighlight(string filePath, string searchQuery)
+        private static void HighlightEntries(PdfDocument doc, string searchQuery)
+        {
+            doc.Pages
+                .AsParallel()
+                .Cast<PdfPageBase>()
+                .ToList()
+                .ForEach(page => page.FindText(searchQuery, TextFindParameter.IgnoreCase).Finds
+                    .ToList()
+                    .ForEach(entry => entry.ApplyHighLight()));
+        }
+
+        public static Image[] GetPdfImages(string filePath, string searchQuery)
         {
             using var doc = new PdfDocument(filePath);
+
+            if(searchQuery != null)
+                HighlightEntries(doc, searchQuery);
 
             var images = new Image[doc.Pages.Count];
 

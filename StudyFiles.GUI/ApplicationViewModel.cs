@@ -45,7 +45,7 @@ namespace StudyFiles.GUI
 
         public ApplicationViewModel()
         {
-            Models = new ObservableCollection<IEntityDTO>(UniversityDataProviderMock.GetUniversities());
+            Models = new ObservableCollection<IEntityDTO>(UniversityDataProvider.GetUniversities());
         }
 
         public void GetNextItemList()
@@ -85,6 +85,9 @@ namespace StudyFiles.GUI
         }
         public void AddFile()
         {
+            if(Models[0] is NotFoundDTO)
+                Models.RemoveAt(0);
+
             if (Level != 4)
                 Models.Add(new NullDTO());
             else
@@ -107,11 +110,15 @@ namespace StudyFiles.GUI
             Models.Remove(SelectedModel);
             SelectedModel = null;
         }
-        public void ShowFile()
+
+        public void ShowFile(string searchQuery = null)
         {
             _catalog.Add(SelectedModel);
 
-            Models = new ObservableCollection<IEntityDTO>(new []{ _supplier.ReadFile(SelectedModel.InnerText)});
+            if (SelectedModel is SearchResultDTO searchResult)
+                Models = new ObservableCollection<IEntityDTO>(new[] {_supplier.ReadFile($"{searchResult.Path}\\{searchResult.InnerText}", searchQuery)});
+            else
+                Models = new ObservableCollection<IEntityDTO>(new[] {_supplier.ReadFile(SelectedModel.InnerText, searchQuery)});
         }
 
         public ICommand AddCommand

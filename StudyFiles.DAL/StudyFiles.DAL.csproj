@@ -13,5 +13,9 @@
   <ItemGroup>
     <ProjectReference Include="..\StudyFiles.DTO\StudyFiles.DTO.csproj" />
   </ItemGroup>
+  
+  <ItemGroup>
+    <None Include="App.config" />
+  </ItemGroup>
 
 </Project>
