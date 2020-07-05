@@ -68,6 +68,12 @@ namespace StudyFiles.GUI
         }
         public void GetSearchResult(string query)
         {
+            if (Models[0] is FileViewDTO)
+            {
+                Models = new ObservableCollection<IEntityDTO>(new[] {_supplier.ReadFile(Models[0].InnerText, query)});
+                return;
+            }
+
             var searchResult = _supplier.FindFiles(Level, query).ToList();
 
             if(!searchResult.Any())
@@ -116,7 +122,8 @@ namespace StudyFiles.GUI
             _catalog.Add(SelectedModel);
 
             if (SelectedModel is SearchResultDTO searchResult)
-                Models = new ObservableCollection<IEntityDTO>(new[] {_supplier.ReadFile($"{searchResult.Path}\\{searchResult.InnerText}", searchQuery)});
+                Models = new ObservableCollection<IEntityDTO>(new[] {_supplier.ReadFile($"{searchResult.Path}\\{searchResult.InnerText}",
+                    searchQuery, searchResult.PageEntries)});
             else
                 Models = new ObservableCollection<IEntityDTO>(new[] {_supplier.ReadFile(SelectedModel.InnerText, searchQuery)});
         }

@@ -9,18 +9,15 @@ using StudyFiles.DAL.DataProviders;
 namespace StudyFiles.Core
 {
     //TODO
-    // 1) Add Search Result View in file
+    // 1) Fix: Another search in SearchResult file (ReadFile wrong filePath)
     // 2) Add file entries fast scroll
-    // 3) Add saving pages with entries for highlighting
-    // 4) File conversion when adding
-    // 5) Fix file preview displaying +--
+    // 3) File conversion when adding
+    // 4) Fix file preview displaying +--
 
-    // 6*) Switch to DataGrid
+    // 5*) Switch to DataGrid
 
     public class Facade
     {
-        private enum Entity { University, Faculty, Discipline, Course };
-
         private readonly int[] _id = new int[4];
 
         private const string StoragePath = @"res\";
@@ -73,22 +70,22 @@ namespace StudyFiles.Core
         }
         private IEnumerable<IEntityDTO> GetFaculties(int universityID)
         {
-            _id[(int)Entity.University] = universityID;
+            _id[0] = universityID;
             return FacultyDataProvider.GetFaculties(universityID);
         }
         private IEnumerable<IEntityDTO> GetDisciplines(int facultyID)
         {
-            _id[(int)Entity.Faculty] = facultyID;
+            _id[1] = facultyID;
             return DisciplineDataProvider.GetDisciplines(facultyID);
         }
         private IEnumerable<IEntityDTO> GetCourses(int disciplineID)
         {
-            _id[(int)Entity.Discipline] = disciplineID;
+            _id[2] = disciplineID;
             return CourseDataProvider.GetCourses(disciplineID);
         }
         private IEnumerable<IEntityDTO> GetFiles(int courseID)
         {
-            _id[(int)Entity.Course] = courseID;
+            _id[3] = courseID;
             return FileDataProvider.GetFiles(GetDirectory(), courseID);
         }
 
@@ -106,14 +103,14 @@ namespace StudyFiles.Core
         private IEntityDTO AddUniversity(string universityName)
             => UniversityDataProvider.AddUniversity(universityName);
         private IEntityDTO AddFaculty(string facultyName)
-            => FacultyDataProvider.AddFaculty(facultyName, _id[(int) Entity.University]);
+            => FacultyDataProvider.AddFaculty(facultyName, _id[0]);
         private IEntityDTO AddDiscipline(string disciplineName)
-            => DisciplineDataProvider.AddDiscipline(disciplineName, _id[(int) Entity.Faculty]);
+            => DisciplineDataProvider.AddDiscipline(disciplineName, _id[1]);
         private IEntityDTO AddCourse(string teacherName)
-            => CourseDataProvider.AddCourse(teacherName, _id[(int) Entity.Discipline]);
+            => CourseDataProvider.AddCourse(teacherName, _id[2]);
 
         private IEntityDTO UploadFile(string filePath)
-            => FileDataProvider.UploadFile(GetDirectory(), _id[(int) Entity.Course], filePath);
+            => FileDataProvider.UploadFile(GetDirectory(), _id[3], filePath);
 
         #endregion
 
@@ -126,18 +123,19 @@ namespace StudyFiles.Core
 
             return Directory.GetFiles(searchPath, "*.*", SearchOption.AllDirectories)
                 .AsParallel()
-                .Where(filePath => FileReader.PdfSearch(filePath, searchQuery))
-                .Select(filePath => FileDataProvider.GetSearchResultDTO(new FileInfo(filePath)))
+                .Select(filePath => (path: filePath, pageEntries: FileReader.PdfSearch(filePath, searchQuery)))
+                .Where(file => file.pageEntries.Any())
+                .Select(file => FileDataProvider.GetSearchResultDTO(new FileInfo(file.path), file.pageEntries))
                 .AsEnumerable();
         }
 
-        public FileViewDTO ReadFile(string fileName, string searchQuery = null)
+        public FileViewDTO ReadFile(string fileName, string searchQuery = null, List<int> pageEntries = null)
         {
             var filePath = searchQuery is null
                 ? Path.Combine(GetDirectory().FullName, fileName)
                 : Path.Combine(StoragePath, fileName);
 
-            return new FileViewDTO(filePath, FileReader.GetPdfImages(filePath, searchQuery));
+            return new FileViewDTO(filePath, FileReader.GetPdfImages(filePath, searchQuery, pageEntries));
         }
     }
 }

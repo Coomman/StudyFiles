@@ -1,4 +1,6 @@
-﻿namespace StudyFiles.DTO
+﻿using System.Collections.Generic;
+
+namespace StudyFiles.DTO
 {
     public class SearchResultDTO : IEntityDTO
     {
@@ -12,12 +14,14 @@
 
         public string Path { get; }
         public string BreadCrumb { get; }
+        public List<int> PageEntries { get; }
 
-        public SearchResultDTO(FileDTO fileInfo, string path, string breadCrumb)
+        public SearchResultDTO(FileDTO fileInfo, string path, string breadCrumb, List<int> pageEntries)
         {
             _fileInfo = fileInfo;
             Path = path;
             BreadCrumb = breadCrumb;
+            PageEntries = pageEntries;
         }
     }
 }

@@ -48,13 +48,13 @@ namespace StudyFiles.DAL.DataProviders
             return new FileDTO(-1, fileInfo.Name, ByteSizeToString(fileInfo.Length), courseId,
                 fileInfo.CreationTimeUtc.ToString("MM/dd/yyyy h:mm"));
         }
-        public static SearchResultDTO GetSearchResultDTO(FileInfo fileInfo)
+        public static SearchResultDTO GetSearchResultDTO(FileInfo fileInfo, List<int> pageEntries)
         {
             var courseId = int.Parse(fileInfo.Directory.Name);
 
             var (path, breadCrumb) = GetBreadCrunch(courseId);
 
-            return new SearchResultDTO(GetFileDTO(fileInfo, courseId), path, breadCrumb);
+            return new SearchResultDTO(GetFileDTO(fileInfo, courseId), path, breadCrumb, pageEntries);
         }
 
         private static (string path, string breadCrumb) GetBreadCrunch(int courseId)

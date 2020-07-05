@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
 
@@ -9,15 +10,17 @@ namespace StudyFiles.DAL.DataProviders
 {
     public static class FileReader
     {
-        public static bool PdfSearch(string filePath, string searchQuery)
+        public static List<int> PdfSearch(string filePath, string searchQuery)
         {
             using var doc = new PdfDocument(filePath);
 
             return doc.Pages
                 .Cast<PdfPageBase>()
-                .Select(page => page.ExtractText())
+                .Select((page, pageNum) => (pageText: page.ExtractText(), pageNum))
                 .AsParallel()
-                .Any(pageText => pageText.Contains(searchQuery, StringComparison.InvariantCultureIgnoreCase));
+                .Where(page => page.pageText.Contains(searchQuery, StringComparison.InvariantCultureIgnoreCase))
+                .Select(page => page.pageNum)
+                .ToList();
 
             //return doc.Pages
             //    .AsParallel()
@@ -27,6 +30,15 @@ namespace StudyFiles.DAL.DataProviders
             //        .SelectMany(entry => entry.Positions)
             //        .ToList()))
             //    .ToList();
+        }
+
+        private static void HighlightEntries(PdfDocument doc, string searchQuery, List<int> pageEntries)
+        {
+            pageEntries
+                .ForEach(pageNum => doc.Pages[pageNum].FindText(searchQuery, TextFindParameter.IgnoreCase)
+                    .Finds
+                    .ToList()
+                    .ForEach(entry => entry.ApplyHighLight()));
         }
 
         private static void HighlightEntries(PdfDocument doc, string searchQuery)
@@ -40,12 +52,15 @@ namespace StudyFiles.DAL.DataProviders
                     .ForEach(entry => entry.ApplyHighLight()));
         }
 
-        public static Image[] GetPdfImages(string filePath, string searchQuery)
+        public static Image[] GetPdfImages(string filePath, string searchQuery, List<int> pageEntries)
         {
             using var doc = new PdfDocument(filePath);
 
             if(searchQuery != null)
-                HighlightEntries(doc, searchQuery);
+                if (pageEntries == null)
+                    HighlightEntries(doc, searchQuery);
+                else
+                    HighlightEntries(doc, searchQuery, pageEntries);
 
             var images = new Image[doc.Pages.Count];
 
