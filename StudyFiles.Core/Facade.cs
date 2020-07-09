@@ -9,12 +9,11 @@ using StudyFiles.DAL.DataProviders;
 namespace StudyFiles.Core
 {
     //TODO
-    // 1) Fix: Another search in SearchResult file (ReadFile wrong filePath)
-    // 2) Add file entries fast scroll
-    // 3) File conversion when adding
-    // 4) Fix file preview displaying +--
+    // 1) Add: In file on search query entries fast scroll
+    // 2) File conversion when adding
+    // 3) Fix file preview displaying +--
 
-    // 5*) Switch to DataGrid
+    // 4*) Switch to DataGrid
 
     public class Facade
     {
@@ -43,9 +42,15 @@ namespace StudyFiles.Core
             };
         }
 
-        private DirectoryInfo GetDirectory()
+        private DirectoryInfo GetDirectory(int depth = 4, int newDir = -1)
         {
-            var path = Path.Combine(StoragePath, _id[0].ToString(), _id[1].ToString(), _id[2].ToString(), _id[3].ToString());
+            var path = StoragePath;
+
+            for (int i = 0; i < depth; i++)
+                path = Path.Combine(path, _id[i].ToString());
+
+            if (newDir != -1)
+                path = Path.Combine(path, newDir.ToString());
 
             return Directory.CreateDirectory(path);
         }
@@ -97,7 +102,9 @@ namespace StudyFiles.Core
 
         public IEntityDTO AddNewModel(int depth, string modelName)
         {
-            return _addCmd[depth].Invoke(modelName);
+            var newItem = _addCmd[depth].Invoke(modelName);
+            GetDirectory(depth, newItem.ID);
+            return newItem;
         }
 
         private IEntityDTO AddUniversity(string universityName)
@@ -116,24 +123,20 @@ namespace StudyFiles.Core
 
         public IEnumerable<IEntityDTO> FindFiles(int depth, string searchQuery)
         {
-            var searchPath = StoragePath.Clone() as string;
-
-            for (int i = 0; i < depth; i++)
-                searchPath = Path.Combine(searchPath, _id[i].ToString());
+            var searchPath = GetDirectory(depth).ToString();
 
             return Directory.GetFiles(searchPath, "*.*", SearchOption.AllDirectories)
                 .AsParallel()
                 .Select(filePath => (path: filePath, pageEntries: FileReader.PdfSearch(filePath, searchQuery)))
                 .Where(file => file.pageEntries.Any())
-                .Select(file => FileDataProvider.GetSearchResultDTO(new FileInfo(file.path), file.pageEntries))
+                .Select(file => FileDataProvider.GetSearchResultDTO(new FileInfo(file.path), file.pageEntries, StoragePath))
                 .AsEnumerable();
         }
 
-        public FileViewDTO ReadFile(string fileName, string searchQuery = null, List<int> pageEntries = null)
+        public FileViewDTO ReadFile(string filePath, string searchQuery = null, List<int> pageEntries = null)
         {
-            var filePath = searchQuery is null
-                ? Path.Combine(GetDirectory().FullName, fileName)
-                : Path.Combine(StoragePath, fileName);
+            if (searchQuery is null)
+                filePath = Path.Combine(GetDirectory().FullName, filePath);
 
             return new FileViewDTO(filePath, FileReader.GetPdfImages(filePath, searchQuery, pageEntries));
         }

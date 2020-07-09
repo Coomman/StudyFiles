@@ -10,20 +10,14 @@ namespace StudyFiles.DAL.DataProviders
     {
         public static List<FacultyDTO> GetFaculties(int universityID)
         {
-            const string query = "Select * from Faculty Where UniversityID = @id";
-
-            using var command = new SqlCommand(query);
+            using var command = new SqlCommand(Queries.GetFaculties);
             command.Parameters.Add(new SqlParameter("@id", SqlDbType.Int) {Value = universityID});
 
             return DBHelper.GetData(new FacultyDTOMapper(), command);
         }
         public static IEntityDTO AddFaculty(string name, int universityID)
         {
-            const string query = "Insert into Faculty ([Name], UniversityID) " +
-                                 "Output Inserted.ID " +
-                                 "values (@name, @id)";
-
-            using var command = new SqlCommand(query);
+            using var command = new SqlCommand(Queries.AddFaculty);
             command.Parameters.Add(new SqlParameter("@name", SqlDbType.NVarChar) { Value = name });
             command.Parameters.Add(new SqlParameter("@id", SqlDbType.Int) { Value = universityID });
 

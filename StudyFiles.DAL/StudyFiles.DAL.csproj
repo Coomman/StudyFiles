@@ -17,5 +17,20 @@
   <ItemGroup>
     <None Include="App.config" />
   </ItemGroup>
+  
+  <ItemGroup>
+    <Compile Update="Queries.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Queries.resx</DependentUpon>
+    </Compile>
+  </ItemGroup>
+  
+  <ItemGroup>
+    <EmbeddedResource Update="Queries.resx">
+      <Generator>PublicResXFileCodeGenerator</Generator>
+      <LastGenOutput>Queries.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+  </ItemGroup>
 
 </Project>

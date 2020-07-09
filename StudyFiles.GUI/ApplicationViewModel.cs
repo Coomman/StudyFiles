@@ -3,12 +3,10 @@ using System.Windows.Input;
 using System.ComponentModel;
 using System.Collections.ObjectModel;
 using System.Runtime.CompilerServices;
-
 using Microsoft.Win32;
 using Microsoft.VisualStudio.PlatformUI;
 
 using StudyFiles.Core;
-using StudyFiles.DAL.DataProviders;
 using StudyFiles.DTO;
 
 namespace StudyFiles.GUI
@@ -45,7 +43,7 @@ namespace StudyFiles.GUI
 
         public ApplicationViewModel()
         {
-            Models = new ObservableCollection<IEntityDTO>(UniversityDataProvider.GetUniversities());
+            Models = new ObservableCollection<IEntityDTO>(_supplier.GetModelsList(Level));
         }
 
         public void GetNextItemList()
@@ -80,6 +78,8 @@ namespace StudyFiles.GUI
                 searchResult.Add(new NotFoundDTO($"No files match \"{query}\" query"));
 
             Models = new ObservableCollection<IEntityDTO>(searchResult);
+
+            _catalog.Add(new NullDTO());
         }
 
         public void AddItem(string name)
@@ -119,7 +119,8 @@ namespace StudyFiles.GUI
 
         public void ShowFile(string searchQuery = null)
         {
-            _catalog.Add(SelectedModel);
+            if (!(SelectedModel is SearchResultDTO))
+                _catalog.Add(SelectedModel);
 
             if (SelectedModel is SearchResultDTO searchResult)
                 Models = new ObservableCollection<IEntityDTO>(new[] {_supplier.ReadFile($"{searchResult.Path}\\{searchResult.InnerText}",

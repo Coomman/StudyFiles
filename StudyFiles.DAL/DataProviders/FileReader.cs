@@ -32,15 +32,6 @@ namespace StudyFiles.DAL.DataProviders
             //    .ToList();
         }
 
-        private static void HighlightEntries(PdfDocument doc, string searchQuery, List<int> pageEntries)
-        {
-            pageEntries
-                .ForEach(pageNum => doc.Pages[pageNum].FindText(searchQuery, TextFindParameter.IgnoreCase)
-                    .Finds
-                    .ToList()
-                    .ForEach(entry => entry.ApplyHighLight()));
-        }
-
         private static void HighlightEntries(PdfDocument doc, string searchQuery)
         {
             doc.Pages
@@ -52,12 +43,21 @@ namespace StudyFiles.DAL.DataProviders
                     .ForEach(entry => entry.ApplyHighLight()));
         }
 
+        private static void HighlightEntries(PdfDocument doc, string searchQuery, List<int> pageEntries)
+        {
+            pageEntries
+                .ForEach(pageNum => doc.Pages[pageNum].FindText(searchQuery, TextFindParameter.IgnoreCase)
+                    .Finds
+                    .ToList()
+                    .ForEach(entry => entry.ApplyHighLight()));
+        }
+
         public static Image[] GetPdfImages(string filePath, string searchQuery, List<int> pageEntries)
         {
             using var doc = new PdfDocument(filePath);
 
             if(searchQuery != null)
-                if (pageEntries == null)
+                if (pageEntries is null)
                     HighlightEntries(doc, searchQuery);
                 else
                     HighlightEntries(doc, searchQuery, pageEntries);

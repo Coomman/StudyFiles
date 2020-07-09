@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace StudyFiles.DTO
+﻿namespace StudyFiles.DTO
 {
     public class FacultyDTO : IEntityDTO
     {

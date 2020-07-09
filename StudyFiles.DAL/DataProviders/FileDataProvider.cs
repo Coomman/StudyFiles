@@ -5,8 +5,9 @@ using System.Globalization;
 using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
-using StudyFiles.DAL.Mappers;
+
 using StudyFiles.DTO;
+using StudyFiles.DAL.Mappers;
 
 namespace StudyFiles.DAL.DataProviders
 {
@@ -48,26 +49,18 @@ namespace StudyFiles.DAL.DataProviders
             return new FileDTO(-1, fileInfo.Name, ByteSizeToString(fileInfo.Length), courseId,
                 fileInfo.CreationTimeUtc.ToString("MM/dd/yyyy h:mm"));
         }
-        public static SearchResultDTO GetSearchResultDTO(FileInfo fileInfo, List<int> pageEntries)
+        public static SearchResultDTO GetSearchResultDTO(FileInfo fileInfo, List<int> pageEntries, string storagePath)
         {
             var courseId = int.Parse(fileInfo.Directory.Name);
 
-            var (path, breadCrumb) = GetBreadCrunch(courseId);
+            var (path, breadCrumb) = GetPath(courseId);
 
-            return new SearchResultDTO(GetFileDTO(fileInfo, courseId), path, breadCrumb, pageEntries);
+            return new SearchResultDTO(GetFileDTO(fileInfo, courseId), Path.Combine(storagePath, path), breadCrumb, pageEntries);
         }
 
-        private static (string path, string breadCrumb) GetBreadCrunch(int courseId)
+        private static (string path, string breadCrumb) GetPath(int courseId)
         {
-            const string query = "Select CONCAT_WS('/', U.Name, F.Name, D.Name, C.Teacher) as BreadCrumb, " +
-                                 "CONCAT_WS('\\', U.ID, F.ID, D.ID, C.ID) as Path " +
-                                 "from University as U " +
-                                 "inner join Faculty as F on(U.ID = F.UniversityID) " +
-                                 "inner join Discipline as D on(F.ID = D.FacultyID) " +
-                                 "inner join Course as C on(D.ID = C.DisciplineID) " +
-                                 "Where C.ID = @id";
-            
-            var command = new SqlCommand(query);
+            var command = new SqlCommand(Queries.GetPath);
             command.Parameters.Add(new SqlParameter("@id", SqlDbType.Int) {Value = courseId});
 
             return DBHelper.GetItem(new PathMapper(), command);

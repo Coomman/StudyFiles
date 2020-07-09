@@ -3,6 +3,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
+
 using StudyFiles.DTO;
 
 // ReSharper disable PossibleNullReferenceException
@@ -28,6 +29,7 @@ namespace StudyFiles.GUI
         private void Back_OnClick(object sender, RoutedEventArgs e)
         {
             _depth--;
+            SearchBox.Clear();
         }
         private void Table_OnItemDoubleClick(object sender, MouseButtonEventArgs mouseButtonEventArgs)
         {
@@ -97,6 +99,7 @@ namespace StudyFiles.GUI
         private void Search_OnClick(object sender, RoutedEventArgs e)
         {
             _lastSearchQuery = SearchBox.Text;
+            _depth++;
         }
     }
 }
