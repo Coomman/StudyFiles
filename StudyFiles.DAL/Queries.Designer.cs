@@ -97,6 +97,15 @@ namespace StudyFiles.DAL {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Data Source=localhost;Initial Catalog=StudyFiles;Integrated Security=true.
+        /// </summary>
+        public static string DefaultConnection {
+            get {
+                return ResourceManager.GetString("DefaultConnection", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Select * from Course Where DisciplineID = @id.
         /// </summary>
         public static string GetCourses {

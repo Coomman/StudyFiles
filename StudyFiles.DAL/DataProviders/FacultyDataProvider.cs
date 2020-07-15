@@ -21,8 +21,8 @@ namespace StudyFiles.DAL.DataProviders
             command.Parameters.Add(new SqlParameter("@name", SqlDbType.NVarChar) { Value = name });
             command.Parameters.Add(new SqlParameter("@id", SqlDbType.Int) { Value = universityID });
 
-            var id = (int)DBHelper.ExecuteScalar(command);
-            return new FacultyDTO(id, name, universityID);
+            var id = (int) DBHelper.ExecuteScalar(command);
+            return new FacultyDTO {ID = id, InnerText = name, UniversityID = universityID};
         }
     }
 }

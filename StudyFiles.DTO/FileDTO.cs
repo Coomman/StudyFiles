@@ -2,19 +2,13 @@
 {
     public class FileDTO : IEntityDTO
     {
-        public int ID { get; }
-        public string InnerText { get; }
-        public string Size { get; }
-        public int CourseID { get; }
-        public string CreationTime { get; }
+        public int ID { get; set; }
+        public string InnerText { get; set; }
+        public int SubType { get; } = 4;
+        public int CourseID { get; set; }
 
-        public FileDTO(int id, string name, string size, int courseID, string creationTime)
-        {
-            ID = id;
-            InnerText = name;
-            Size = size;
-            CourseID = courseID;
-            CreationTime = creationTime;
-        }
+        public string Size { get; set; }
+        public string Extension { get; set; }
+        public string CreationTime { get; set; }
     }
 }

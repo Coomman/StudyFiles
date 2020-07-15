@@ -1,19 +1,29 @@
-﻿using System.Linq;
+﻿using System.IO;
+using System.Linq;
 using System.Windows.Input;
 using System.ComponentModel;
 using System.Collections.ObjectModel;
 using System.Runtime.CompilerServices;
+
 using Microsoft.Win32;
 using Microsoft.VisualStudio.PlatformUI;
 
-using StudyFiles.Core;
 using StudyFiles.DTO;
+using StudyFiles.GUI.ServiceProxies;
 
 namespace StudyFiles.GUI
 {
     class ApplicationViewModel : INotifyPropertyChanged
     {
-        private readonly Facade _supplier = new Facade();
+        //TODO:
+        // 1) Refactor this class
+        // 2) Fix several queries for file displaying error
+        // 3) Swap static classes on service to IoC
+        // 4) Add .doc and .docx formats support
+
+        private string _tempFilePath;
+
+        private readonly DataServiceProxy _serviceProxy = new DataServiceProxy();
         private readonly ObservableCollection<IEntityDTO> _catalog = new ObservableCollection<IEntityDTO>();
 
         private ObservableCollection<IEntityDTO> _models;
@@ -38,79 +48,95 @@ namespace StudyFiles.GUI
             }
         }
 
-        public int Level 
+        private int Level 
             => _catalog.Count;
+        private string GetDirectory()
+        {
+            var path = string.Empty;
+
+            for (int i = 0; i < Level; i++)
+                path = Path.Combine(path, _catalog[i].ID.ToString());
+
+            return path;
+        }
+        private void DisplayFileDialog()
+        {
+            var fd = new OpenFileDialog
+            {
+                Title = "Select a file",
+
+                Filter = "PDF files (*.pdf)|*.pdf|" +
+                         "Microsoft Word (*.doc;*.docx)|*.doc;*.docx|" +
+                         "Text files (*.txt)|*.txt"
+            };
+
+            if (fd.ShowDialog() == true)
+                Models.Add(_serviceProxy.UploadFile(File.ReadAllBytes(fd.FileName), 
+                    Path.Combine(GetDirectory(), fd.SafeFileName), _catalog.Last().ID));
+        }
 
         public ApplicationViewModel()
         {
-            Models = new ObservableCollection<IEntityDTO>(_supplier.GetModelsList(Level));
+            Models = new ObservableCollection<IEntityDTO>(_serviceProxy.GetFolderList(0));
         }
 
         public void GetNextItemList()
         {
             _catalog.Add(SelectedModel);
 
-            Models = new ObservableCollection<IEntityDTO>(_supplier.GetModelsList(Level, SelectedModel.ID));
+            Models = new ObservableCollection<IEntityDTO>(Level == 4
+                ? _serviceProxy.GetFileList(GetDirectory(), SelectedModel.ID)
+                : _serviceProxy.GetFolderList(Level, SelectedModel.ID));
 
             SelectedModel = null;
-        }
+        } //++
         public void GetPrevItemList()
         {
-            _catalog.RemoveAt(Level - 1);
+            if (_tempFilePath != null)
+            {
+                File.Delete(_tempFilePath);
+                _tempFilePath = null;
+            }
 
-            Models = new ObservableCollection<IEntityDTO>(_catalog.Any()
-                    ? _supplier.GetModelsList(Level, _catalog[^1].ID)
-                    : _supplier.GetModelsList(Level)); 
+            if(!(Models.Last() is FileViewDTO))
+                _catalog.RemoveAt(Level - 1);
+
+            Models = new ObservableCollection<IEntityDTO>(Level < 4
+                ? _serviceProxy.GetFolderList(Level, _catalog.LastOrDefault()?.ID ?? -1)
+                : _serviceProxy.GetFileList(GetDirectory(), _catalog.Last().ID));
 
             SelectedModel = null;
-        }
+        } //++
         public void GetSearchResult(string query)
         {
-            if (Models[0] is FileViewDTO)
+            if (Models.First() is FileViewDTO)
             {
-                Models = new ObservableCollection<IEntityDTO>(new[] {_supplier.ReadFile(Models[0].InnerText, query)});
+                Models = new ObservableCollection<IEntityDTO>(new[] {_serviceProxy.GetFile(Models[0].InnerText, ".pdf")});
                 return;
             }
 
-            var searchResult = _supplier.FindFiles(Level, query).ToList();
-
-            if(!searchResult.Any())
-                searchResult.Add(new NotFoundDTO($"No files match \"{query}\" query"));
-
-            Models = new ObservableCollection<IEntityDTO>(searchResult);
+            Models = new ObservableCollection<IEntityDTO>(_serviceProxy.FindFiles(GetDirectory(), query));
 
             _catalog.Add(new NullDTO());
         }
 
-        public void AddItem(string name)
+        public void AddFolder(string name)
         {
-            if(Level != 4)
-                Models.RemoveAt(Models.Count - 1);
+            Models.RemoveAt(Models.Count - 1);
 
-            Models.Add(_supplier.AddNewModel(Level, name));
+            Models.Add(_serviceProxy.AddNewFolder(Level, name, _catalog.Last().ID));
         }
-        public void AddFile()
+        public void AddItem()
         {
-            if(Models[0] is NotFoundDTO)
+            if(Models.First() is NotFoundDTO)
                 Models.RemoveAt(0);
 
             if (Level != 4)
                 Models.Add(new NullDTO());
             else
-            {
-                var fd = new OpenFileDialog
-                {
-                    Title = "Select a file",
-
-                    Filter = "PDF files (*.pdf)|*.pdf|" +
-                             "Microsoft Word (*.doc;*.docx)|*.doc;*.docx|" +
-                             "Text files (*.txt)|*.txt"
-                };
-
-                if (fd.ShowDialog() == true)
-                    AddItem(fd.FileName);
-            }
+                DisplayFileDialog();
         }
+
         public void DeleteItem()
         {
             Models.Remove(SelectedModel);
@@ -119,30 +145,43 @@ namespace StudyFiles.GUI
 
         public void ShowFile(string searchQuery = null)
         {
-            if (!(SelectedModel is SearchResultDTO))
-                _catalog.Add(SelectedModel);
-
             if (SelectedModel is SearchResultDTO searchResult)
-                Models = new ObservableCollection<IEntityDTO>(new[] {_supplier.ReadFile($"{searchResult.Path}\\{searchResult.InnerText}",
-                    searchQuery, searchResult.PageEntries)});
-            else
-                Models = new ObservableCollection<IEntityDTO>(new[] {_supplier.ReadFile(SelectedModel.InnerText, searchQuery)});
+                Models = new ObservableCollection<IEntityDTO>(new[]
+                    {_serviceProxy.GetFile($"{searchResult.Path}\\{searchResult.InnerText}", ".pdf")});
+
+            if (SelectedModel is FileDTO file)
+            {
+                var fileView = _serviceProxy.GetFile(Path.Combine(GetDirectory(), SelectedModel.InnerText),
+                    file.Extension);
+
+                _tempFilePath = fileView.InnerText;
+                Models = new ObservableCollection<IEntityDTO>(new[] {fileView});
+            }
         }
 
-        public ICommand AddCommand
-            => new DelegateCommand(obj => AddFile(),
-                obj => Level != 5);
-        public ICommand DeleteCommand 
-            => new DelegateCommand(obj => DeleteItem(), 
-                obj => SelectedModel != null && Level != 5);
-        public ICommand SearchCommand
-            => new DelegateCommand(obj => GetSearchResult(obj.ToString()));
+        #region Commands
 
+        public ICommand AddCommand
+            => new DelegateCommand(obj => AddItem(),
+                obj => Level != 5 && !(Models.LastOrDefault() is NullDTO)); //TODO: Add In-Search state
+        public ICommand DeleteCommand
+            => new DelegateCommand(obj => DeleteItem(),
+                obj => SelectedModel != null && Level != 5); //TODO: Add In-Search state
+        public ICommand SearchCommand
+            => new DelegateCommand(obj => GetSearchResult(obj.ToString()),
+                obj => Models.Any() && !string.IsNullOrEmpty(obj.ToString())); //TODO: Add searchQuery domains
+
+        public ICommand OnFolderDoubleClickCommand
+            => new DelegateCommand(obj => GetNextItemList());
+        public ICommand OnFileDoubleClickCommand
+            => new DelegateCommand(obj => ShowFile());
         public ICommand BackCommand
-            => new DelegateCommand(obj => GetPrevItemList(), 
+            => new DelegateCommand(obj => GetPrevItemList(),
                 obj => Level != 0);
         public ICommand WindowMouseClickCommand
             => new DelegateCommand(obj => SelectedModel = null);
+
+        #endregion
 
         public event PropertyChangedEventHandler PropertyChanged;
         public void OnPropertyChanged([CallerMemberName]string prop = "")

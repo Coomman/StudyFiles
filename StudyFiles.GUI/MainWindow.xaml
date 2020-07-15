@@ -3,13 +3,11 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity"
         mc:Ignorable="d"
 
         xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
-        xmlns:gui="clr-namespace:StudyFiles.GUI"
-        xmlns:visualBasic="clr-namespace:Microsoft.VisualBasic;assembly=Microsoft.VisualBasic.Core"
         xmlns:controls="clr-namespace:StudyFiles.GUI.Controls"
+        xmlns:web="clr-namespace:CefSharp.Wpf;assembly=CefSharp.Wpf"
         TextElement.Foreground="{DynamicResource MaterialDesignBody}"
         TextElement.FontWeight="Regular"
         TextElement.FontSize="13"
@@ -25,15 +23,21 @@
 
     <Window.Resources>
         <controls:ItemTemplateSelector x:Key="ItemTemplateSelector"/>
-        <DataTemplate x:Key="RealItem">
-            <StackPanel Margin="5" Orientation="Horizontal">
-                <materialDesign:PackIcon Kind="FolderOutline" VerticalAlignment="Center" FontSize="18"/>
-                <TextBlock FontSize="18" Text="{Binding Path=InnerText, Mode=OneWay}" VerticalAlignment="Center" Margin="5"/>
-            </StackPanel>
-        </DataTemplate>
 
-        <DataTemplate x:Key="NullObject">
-            <StackPanel Margin="5" Orientation="Horizontal">
+            <DataTemplate x:Key="Folder">
+                <StackPanel Margin="5" Orientation="Horizontal" Background="Transparent">
+                    <StackPanel.InputBindings>
+                    <MouseBinding MouseAction="LeftDoubleClick" Command="{Binding RelativeSource={RelativeSource AncestorType=ListBox},
+                        Path=DataContext.OnFolderDoubleClickCommand}"/>
+                    </StackPanel.InputBindings>
+
+                <materialDesign:PackIcon Kind="FolderOutline" VerticalAlignment="Center" FontSize="18"/>
+                    <TextBlock FontSize="18" Text="{Binding Path=InnerText, Mode=OneWay}" VerticalAlignment="Center" Margin="5"/>
+                </StackPanel>
+            </DataTemplate>
+
+            <DataTemplate x:Key="NullObject">
+            <StackPanel Margin="5" Orientation="Horizontal" Background="Transparent">
                 <TextBox
                     Style="{StaticResource MaterialDesignFilledTextFieldTextBox}" VerticalAlignment="Center"
                     FontSize="18" Height="72"
@@ -49,7 +53,12 @@
         </DataTemplate>
 
         <DataTemplate x:Key="File">
-            <DockPanel Margin="5">
+            <StackPanel Margin="5" Orientation="Horizontal" Background="Transparent">
+                <StackPanel.InputBindings>
+                    <MouseBinding MouseAction="LeftDoubleClick" Command="{Binding RelativeSource={RelativeSource AncestorType=ListBox},
+                        Path=DataContext.OnFileDoubleClickCommand}"/>
+                </StackPanel.InputBindings>
+
                 <materialDesign:PackIcon Kind="FileOutline" FontSize="18" VerticalAlignment="Center" DockPanel.Dock="Left"/>
                 <TextBlock DockPanel.Dock="Left" FontSize="18" Text="{Binding Path=InnerText, Mode=OneWay}" 
                            VerticalAlignment="Center" Margin="5"/>
@@ -57,11 +66,12 @@
                            VerticalAlignment="Center" HorizontalAlignment="Center" Margin="200, 0, 600, 0"/>
                 <TextBlock DockPanel.Dock="Right" FontSize="14" Text="{Binding Path=Size, Mode=OneWay}"
                            FontStyle="Italic" VerticalAlignment="Center"/>
-            </DockPanel>
+            </StackPanel>
         </DataTemplate>
 
         <DataTemplate x:Key="FileView">
-            <controls:PdfViewer ImageSource="{Binding Path=Images}"/>
+            <web:ChromiumWebBrowser x:Name="Browser" Address="{Binding Path=InnerText}"
+                                    Height="{Binding RelativeSource={RelativeSource AncestorType=Window}, Path=ActualHeight}"/>
         </DataTemplate>
     </Window.Resources>
 
@@ -86,7 +96,7 @@
                     </TextBox>
                 </Border>
 
-                <Button Name ="Search" Background="{x:Null}" BorderBrush="{x:Null}" Click="Search_OnClick"
+                <Button Name ="Search" Background="{x:Null}" BorderBrush="{x:Null}"
                         Command="{Binding SearchCommand}" CommandParameter="{Binding Text, ElementName=SearchBox}">
                     <materialDesign:PackIcon Kind="Search"  Width="20" Height="20"/>
                 </Button>
@@ -109,10 +119,10 @@
             ItemsSource="{Binding Models}"
             SelectedItem="{Binding SelectedModel, Mode=TwoWay}"
             ItemTemplateSelector="{StaticResource ItemTemplateSelector}"
-            Name ="Table"
+            Name="Table" Background="Transparent"
             ScrollViewer.VerticalScrollBarVisibility="Auto" 
-            Margin="0,0,10,10"
-            MouseDoubleClick="Table_OnItemDoubleClick">
+            HorizontalContentAlignment="Stretch"
+            Margin="0,0,10,10">
         </ListBox>
     </StackPanel>
 </Window>

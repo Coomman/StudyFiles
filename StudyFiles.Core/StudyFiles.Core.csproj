@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk.Web">
 
   <PropertyGroup>
     <TargetFramework>netcoreapp3.1</TargetFramework>
@@ -8,5 +8,6 @@
     <ProjectReference Include="..\StudyFiles.DAL\StudyFiles.DAL.csproj" />
     <ProjectReference Include="..\StudyFiles.DTO\StudyFiles.DTO.csproj" />
   </ItemGroup>
+
 
 </Project>

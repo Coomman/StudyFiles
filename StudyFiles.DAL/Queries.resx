@@ -129,6 +129,9 @@
   <data name="AddUniversity" xml:space="preserve">
     <value>Insert into University ([Name]) Output Inserted.ID values (@name)</value>
   </data>
+  <data name="DefaultConnection" xml:space="preserve">
+    <value>Data Source=localhost;Initial Catalog=StudyFiles;Integrated Security=true</value>
+  </data>
   <data name="GetCourses" xml:space="preserve">
     <value>Select * from Course Where DisciplineID = @id</value>
   </data>

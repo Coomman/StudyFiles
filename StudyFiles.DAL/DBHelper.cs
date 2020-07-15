@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Configuration;
 using System.Data;
 using System.Data.SqlClient;
 using StudyFiles.DAL.Mappers;
-using System.Configuration;
 
 namespace StudyFiles.DAL
 {
@@ -11,7 +11,7 @@ namespace StudyFiles.DAL
     {
         public static List<T> GetData<T>(IMapper<T> mapper, SqlCommand command)
         {
-            var connectionString = ConfigurationManager.ConnectionStrings["DefaultConnection"].ConnectionString;
+            var connectionString = Queries.DefaultConnection;
 
             using var connection = new SqlConnection(connectionString);
 
@@ -45,7 +45,7 @@ namespace StudyFiles.DAL
 
         public static T GetItem<T>(IMapper<T> mapper, SqlCommand command)
         {
-            var connectionString = ConfigurationManager.ConnectionStrings["DefaultConnection"].ConnectionString;
+            var connectionString = Queries.DefaultConnection;
 
             using var connection = new SqlConnection(connectionString);
 
@@ -79,7 +79,7 @@ namespace StudyFiles.DAL
 
         public static object ExecuteScalar(SqlCommand command)
         {
-            var connectionString = ConfigurationManager.ConnectionStrings["DefaultConnection"].ConnectionString;
+            var connectionString = Queries.DefaultConnection;
 
             using var connection = new SqlConnection(connectionString);
 

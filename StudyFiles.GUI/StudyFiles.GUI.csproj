@@ -4,17 +4,57 @@
     <OutputType>WinExe</OutputType>
     <TargetFramework>netcoreapp3.1</TargetFramework>
     <UseWPF>true</UseWPF>
+    <Platforms>x86</Platforms>
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="CefSharp.Wpf" Version="83.4.20" />
     <PackageReference Include="MaterialDesignColors" Version="1.2.6" />
     <PackageReference Include="MaterialDesignThemes" Version="3.1.3" />
     <PackageReference Include="Microsoft.VisualStudio.Utilities" Version="16.6.30107.105" />
     <PackageReference Include="Microsoft.Windows.SDK.Contracts" Version="10.0.19041.1" />
+    <PackageReference Include="RestSharp" Version="106.11.4" />
+    <PackageReference Include="RestSharp.Serializers.NewtonsoftJson" Version="106.11.4" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\StudyFiles.Core\StudyFiles.Core.csproj" />
+    <ProjectReference Include="..\StudyFiles.DTO\StudyFiles.DTO.csproj" />
   </ItemGroup>
+
+  <ItemGroup>
+    <!-- TODO: These updates are currently required because CefSharp.Wpf specifies
+         <Private>false</Private>, which means these libraries will not be specified in
+         the .deps.json file, and so the CoreCLR wouldn't load these. -->
+    <Reference Update="CefSharp">
+      <Private>true</Private>
+    </Reference>
+    <Reference Update="CefSharp.Core">
+      <Private>true</Private>
+    </Reference>
+    <Reference Update="CefSharp.Wpf">
+      <Private>true</Private>
+    </Reference>
+  </ItemGroup>
+
+  <!-- Include CefSharp.BrowserSubprocess.Core so we can selfhost the BrowserSubProcess using our exe -->
+  <Choose>
+    <When Condition="'$(PlatformTarget)' == 'x64'">
+      <ItemGroup>
+        <Reference Include="CefSharp.BrowserSubprocess.Core">
+          <HintPath>$(CefSharpBrowserProcessCore64)</HintPath>
+          <Private>true</Private>
+        </Reference>
+      </ItemGroup>
+    </When>
+    <!-- x86, Win32 and AnyCPU -->
+    <Otherwise>
+      <ItemGroup>
+        <Reference Include="CefSharp.BrowserSubprocess.Core">
+          <HintPath>$(CefSharpBrowserProcessCore32)</HintPath>
+          <Private>true</Private>
+        </Reference>
+      </ItemGroup>
+    </Otherwise>
+  </Choose>
 
 </Project>

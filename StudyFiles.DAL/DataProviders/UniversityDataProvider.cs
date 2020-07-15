@@ -20,7 +20,7 @@ namespace StudyFiles.DAL.DataProviders
             command.Parameters.Add(new SqlParameter("@name", SqlDbType.NVarChar) {Value = name});
 
             var id = (int) DBHelper.ExecuteScalar(command);
-            return new UniversityDTO(id, name);
+            return new UniversityDTO {ID = id, InnerText = name};
         }
     }
 }

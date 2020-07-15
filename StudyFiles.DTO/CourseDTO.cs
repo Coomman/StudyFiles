@@ -2,15 +2,9 @@
 {
     public class CourseDTO : IEntityDTO
     {
-        public int ID { get; }
-        public string InnerText { get; }
-        public int DisciplineID { get; }
-
-        public CourseDTO(int id, string teacher, int disciplineID)
-        {
-            ID = id;
-            InnerText = teacher;
-            DisciplineID = disciplineID;
-        }
+        public int ID { get; set; }
+        public string InnerText { get; set; }
+        public int SubType { get; } = 3;
+        public int DisciplineID { get; set; }
     }
 }

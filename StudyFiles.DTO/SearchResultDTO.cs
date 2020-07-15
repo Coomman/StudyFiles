@@ -4,24 +4,25 @@ namespace StudyFiles.DTO
 {
     public class SearchResultDTO : IEntityDTO
     {
-        private readonly FileDTO _fileInfo;
+        public FileDTO FileInfo { get; set; }
 
-        public int ID => _fileInfo.ID;
-        public string InnerText => _fileInfo.InnerText;
-        public string Size => _fileInfo.Size;
-        public int CourseID => _fileInfo.CourseID;
-        public string CreationTime => _fileInfo.CreationTime;
-
-        public string Path { get; }
-        public string BreadCrumb { get; }
-        public List<int> PageEntries { get; }
-
-        public SearchResultDTO(FileDTO fileInfo, string path, string breadCrumb, List<int> pageEntries)
+        public int ID
         {
-            _fileInfo = fileInfo;
-            Path = path;
-            BreadCrumb = breadCrumb;
-            PageEntries = pageEntries;
+            get => FileInfo.ID;
+            set => FileInfo.ID = value;
         }
+        public string InnerText
+        {
+            get => FileInfo.InnerText;
+            set => FileInfo.InnerText = value;
+        }
+        public int SubType { get; } = 8;
+        public string Size => FileInfo.Size;
+        public int CourseID => FileInfo.CourseID;
+        public string CreationTime => FileInfo.CreationTime;
+
+        public string Path { get; set; }
+        public string BreadCrumb { get; set; }
+        public List<int> PageEntries { get; set; }
     }
 }

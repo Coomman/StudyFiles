@@ -2,15 +2,9 @@
 {
     public class FacultyDTO : IEntityDTO
     {
-        public int ID { get; }
-        public string InnerText { get; }
-        public int UniversityID { get; }
-
-        public FacultyDTO(int id, string name, int universityID)
-        {
-            ID = id;
-            InnerText = name;
-            UniversityID = universityID;
-        }
+        public int ID { get; set; }
+        public string InnerText { get; set; }
+        public int SubType { get; } = 1;
+        public int UniversityID { get; set; }
     }
 }

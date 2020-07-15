@@ -52,7 +52,7 @@ namespace StudyFiles.DAL.DataProviders
                     .ForEach(entry => entry.ApplyHighLight()));
         }
 
-        public static Image[] GetPdfImages(string filePath, string searchQuery, List<int> pageEntries)
+        public static List<Image> GetPdfImages(string filePath, string searchQuery, List<int> pageEntries)
         {
             using var doc = new PdfDocument(filePath);
 
@@ -62,12 +62,9 @@ namespace StudyFiles.DAL.DataProviders
                 else
                     HighlightEntries(doc, searchQuery, pageEntries);
 
-            var images = new Image[doc.Pages.Count];
-
-            for (int i = 0; i < doc.Pages.Count; i++)
-                images[i] = doc.SaveAsImage(i);
-
-            return images;
+            return Enumerable.Range(0, doc.Pages.Count)
+                .Select(i => doc.SaveAsImage(i))
+                .ToList();
         }
     }
 }

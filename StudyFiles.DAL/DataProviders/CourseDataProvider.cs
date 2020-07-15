@@ -22,7 +22,7 @@ namespace StudyFiles.DAL.DataProviders
             command.Parameters.Add(new SqlParameter("@id", SqlDbType.Int) { Value = disciplineID });
 
             var id = (int)DBHelper.ExecuteScalar(command);
-            return new CourseDTO(id, teacherName, disciplineID);
+            return new CourseDTO{ID = id, DisciplineID = disciplineID, InnerText = teacherName};
         }
     }
 }

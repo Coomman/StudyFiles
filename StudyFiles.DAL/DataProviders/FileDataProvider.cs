@@ -26,28 +26,36 @@ namespace StudyFiles.DAL.DataProviders
 
             return $"{(Math.Sign(byteCount) * num).ToString(CultureInfo.InvariantCulture)} {suf[place]}";
         }
+        private static (string path, string breadCrumb) GetPath(int courseId)
+        {
+            var command = new SqlCommand(Queries.GetPath);
+            command.Parameters.Add(new SqlParameter("@id", SqlDbType.Int) { Value = courseId });
+
+            return DBHelper.GetItem(new PathMapper(), command);
+        }
 
         public static IEnumerable<FileDTO> GetFiles(DirectoryInfo dir, int courseId)
         {
             return dir.GetFiles()
                 .Select(fileInfo => GetFileDTO(fileInfo, courseId));
         }
-
-        public static FileDTO UploadFile(DirectoryInfo dir, int courseId, string filePath)
+        public static FileDTO UploadFile(byte[] data, string filePath, int courseId)
         {
-            var fileInfo = new FileInfo(filePath);
+            using (var fileStream = File.Create(filePath))
+                fileStream.Write(data);
 
-            var destPath = Path.Combine(dir.FullName, fileInfo.Name);
-
-            File.Copy(filePath, destPath);
-
-            return GetFileDTO(new FileInfo(destPath), courseId);
+            return GetFileDTO(new FileInfo(filePath), courseId);
         }
 
         public static FileDTO GetFileDTO (FileInfo fileInfo, int courseId)
         {
-            return new FileDTO(-1, fileInfo.Name, ByteSizeToString(fileInfo.Length), courseId,
-                fileInfo.CreationTimeUtc.ToString("MM/dd/yyyy h:mm"));
+            return new FileDTO
+            {
+                InnerText = fileInfo.Name, CourseID = courseId, 
+                CreationTime = fileInfo.CreationTimeUtc.ToString("MM/dd/yyyy h:mm"), 
+                Extension = fileInfo.Extension,
+                Size = ByteSizeToString(fileInfo.Length)
+            };
         }
         public static SearchResultDTO GetSearchResultDTO(FileInfo fileInfo, List<int> pageEntries, string storagePath)
         {
@@ -55,15 +63,13 @@ namespace StudyFiles.DAL.DataProviders
 
             var (path, breadCrumb) = GetPath(courseId);
 
-            return new SearchResultDTO(GetFileDTO(fileInfo, courseId), Path.Combine(storagePath, path), breadCrumb, pageEntries);
-        }
-
-        private static (string path, string breadCrumb) GetPath(int courseId)
-        {
-            var command = new SqlCommand(Queries.GetPath);
-            command.Parameters.Add(new SqlParameter("@id", SqlDbType.Int) {Value = courseId});
-
-            return DBHelper.GetItem(new PathMapper(), command);
+            return new SearchResultDTO
+            {
+                FileInfo = GetFileDTO(fileInfo, courseId),
+                Path = Path.Combine(storagePath, path),
+                BreadCrumb = breadCrumb,
+                PageEntries = pageEntries
+            };
         }
     }
 }

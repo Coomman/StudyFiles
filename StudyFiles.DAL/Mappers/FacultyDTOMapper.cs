@@ -7,9 +7,12 @@ namespace StudyFiles.DAL.Mappers
     {
         public FacultyDTO ReadItem(SqlDataReader dr)
         {
-            return new FacultyDTO((int) dr["ID"],
-                (string) dr["Name"],
-                (int) dr["UniversityID"]);
+            return new FacultyDTO
+            {
+                ID = (int) dr["ID"],
+                InnerText = (string) dr["Name"],
+                UniversityID = (int) dr["UniversityID"]
+            };
         }
     }
 }

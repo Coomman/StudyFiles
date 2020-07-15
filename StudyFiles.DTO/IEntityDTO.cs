@@ -1,8 +1,23 @@
-﻿namespace StudyFiles.DTO
+﻿using JsonSubTypes;
+using Newtonsoft.Json;
+
+namespace StudyFiles.DTO
 {
+    [JsonConverter(typeof(JsonSubtypes), "SubType")]
+    [JsonSubtypes.KnownSubType(typeof(UniversityDTO), 0)]
+    [JsonSubtypes.KnownSubType(typeof(FacultyDTO), 1)]
+    [JsonSubtypes.KnownSubType(typeof(DisciplineDTO), 2)]
+    [JsonSubtypes.KnownSubType(typeof(CourseDTO), 3)]
+    [JsonSubtypes.KnownSubType(typeof(FileDTO), 4)]
+    [JsonSubtypes.KnownSubType(typeof(FileViewDTO), 5)]
+    [JsonSubtypes.KnownSubType(typeof(NotFoundDTO), 6)]
+    [JsonSubtypes.KnownSubType(typeof(NullDTO), 7)]
+    [JsonSubtypes.KnownSubType(typeof(SearchResultDTO), 8)]
     public interface IEntityDTO
     {
-        public int ID { get; }
-        public string InnerText { get; }
+        int ID { get; set; }
+        string InnerText { get; set; }
+
+        int SubType { get; }
     }
 }

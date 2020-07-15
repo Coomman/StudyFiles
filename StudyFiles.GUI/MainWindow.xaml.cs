@@ -4,8 +4,6 @@ using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
 
-using StudyFiles.DTO;
-
 // ReSharper disable PossibleNullReferenceException
 
 namespace StudyFiles.GUI
@@ -15,9 +13,6 @@ namespace StudyFiles.GUI
     /// </summary>
     public partial class MainWindow
     {
-        private int _depth;
-        private string _lastSearchQuery;
-
         public MainWindow()
         {
             InitializeComponent();
@@ -25,39 +20,9 @@ namespace StudyFiles.GUI
             DataContext = new ApplicationViewModel();
         }
 
-        // Otherwise mouse double click is not working
         private void Back_OnClick(object sender, RoutedEventArgs e)
         {
-            _depth--;
             SearchBox.Clear();
-        }
-        private void Table_OnItemDoubleClick(object sender, MouseButtonEventArgs mouseButtonEventArgs)
-        {
-            if (mouseButtonEventArgs.ChangedButton != MouseButton.Left)
-                return;
-
-            var vm = DataContext as ApplicationViewModel;
-            var listBox = sender as ListBox;
-
-            if (_depth == 5 || listBox.SelectedItem is NotFoundDTO)
-                return;
-
-            _depth++;
-
-            if (_depth == 5)
-            {
-                vm.ShowFile();
-                return;
-            }
-
-            if (listBox.SelectedItem is SearchResultDTO)
-            {
-                vm.ShowFile(_lastSearchQuery);
-                return;
-            }
-
-            vm.GetNextItemList();
-            Back.IsEnabled = true;
         }
 
         private void NewItem_OnInitialized(object? sender, EventArgs e)
@@ -69,11 +34,11 @@ namespace StudyFiles.GUI
         {
             var textBox = sender as TextBox;
 
-            if (textBox.Text == "")
+            if (textBox.Text.Length == 0)
                 return;
 
             var vm = DataContext as ApplicationViewModel;
-            vm.AddItem(textBox.Text);
+            vm.AddFolder(textBox.Text);
         }
         private void NewItem_OnKeyDown(object sender, KeyEventArgs e)
         {
@@ -94,12 +59,6 @@ namespace StudyFiles.GUI
         {
             if(SearchBox.Text.Length == 0)
                 SearchBorder.Background = Brushes.Transparent;
-        }
-
-        private void Search_OnClick(object sender, RoutedEventArgs e)
-        {
-            _lastSearchQuery = SearchBox.Text;
-            _depth++;
         }
     }
 }
