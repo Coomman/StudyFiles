@@ -1,70 +1,40 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Drawing;
+using System.IO;
 using System.Linq;
 
 using Spire.Pdf;
-using Spire.Pdf.General.Find;
+using Aspose.Words;
 
 namespace StudyFiles.DAL.DataProviders
 {
-    public static class FileReader
+    public class FileReader : IFileReader
     {
-        public static List<int> PdfSearch(string filePath, string searchQuery)
+        private static bool TxtSearch(string filePath, string searchQuery)
+        {
+            return File.ReadAllText(filePath).Contains(searchQuery);
+        }
+        private static bool PdfSearch(string filePath, string searchQuery)
         {
             using var doc = new PdfDocument(filePath);
 
             return doc.Pages
                 .Cast<PdfPageBase>()
-                .Select((page, pageNum) => (pageText: page.ExtractText(), pageNum))
+                .Select(page => page.ExtractText())
                 .AsParallel()
-                .Where(page => page.pageText.Contains(searchQuery, StringComparison.InvariantCultureIgnoreCase))
-                .Select(page => page.pageNum)
-                .ToList();
-
-            //return doc.Pages
-            //    .AsParallel()
-            //    .Cast<PdfPageBase>()
-            //    .Select((page, pageNum) => (pageNum, page.FindText(searchQuery, TextFindParameter.IgnoreCase).Finds
-            //        .AsParallel()
-            //        .SelectMany(entry => entry.Positions)
-            //        .ToList()))
-            //    .ToList();
+                .Any(pageText => pageText.Contains(searchQuery, StringComparison.InvariantCultureIgnoreCase));
         }
 
-        private static void HighlightEntries(PdfDocument doc, string searchQuery)
+        public bool FileSearch(string fileExtension, string filePath, string searchQuery)
         {
-            doc.Pages
-                .AsParallel()
-                .Cast<PdfPageBase>()
-                .ToList()
-                .ForEach(page => page.FindText(searchQuery, TextFindParameter.IgnoreCase).Finds
-                    .ToList()
-                    .ForEach(entry => entry.ApplyHighLight()));
+            return fileExtension == ".txt" 
+                ? TxtSearch(filePath, searchQuery) 
+                : PdfSearch(filePath, searchQuery);
         }
-
-        private static void HighlightEntries(PdfDocument doc, string searchQuery, List<int> pageEntries)
+        public void SaveAsPdf(string filePath)
         {
-            pageEntries
-                .ForEach(pageNum => doc.Pages[pageNum].FindText(searchQuery, TextFindParameter.IgnoreCase)
-                    .Finds
-                    .ToList()
-                    .ForEach(entry => entry.ApplyHighLight()));
-        }
+            var doc = new Document(filePath);
 
-        public static List<Image> GetPdfImages(string filePath, string searchQuery, List<int> pageEntries)
-        {
-            using var doc = new PdfDocument(filePath);
-
-            if(searchQuery != null)
-                if (pageEntries is null)
-                    HighlightEntries(doc, searchQuery);
-                else
-                    HighlightEntries(doc, searchQuery, pageEntries);
-
-            return Enumerable.Range(0, doc.Pages.Count)
-                .Select(i => doc.SaveAsImage(i))
-                .ToList();
+            doc.Save("...");
         }
     }
 }

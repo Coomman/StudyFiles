@@ -1,7 +1,8 @@
-﻿using System.Net.Http;
+﻿using System.IO;
+using System.Net.Http;
 using System.Configuration;
 using System.Collections.Generic;
-using System.IO;
+
 using RestSharp;
 using RestSharp.Serializers.NewtonsoftJson;
 
@@ -70,7 +71,7 @@ namespace StudyFiles.GUI.ServiceProxies
 
         public FileViewDTO GetFile(string filePath, string extension)
         {
-            var tempFile = Path.GetTempFileName() + extension;
+            var tempFile = Path.GetFullPath("temp" + extension);
 
             var result = GetRequest<byte[]>($"data/download?filePath={filePath}");
 

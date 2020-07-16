@@ -6,22 +6,29 @@ using StudyFiles.DTO;
 
 namespace StudyFiles.DAL.DataProviders
 {
-    public static class DisciplineDataProvider
+    public class DisciplineRepository : IDisciplineRepository
     {
-        public static List<DisciplineDTO> GetDisciplines(int facultyID)
+        private readonly IDBHelper _dbHelper;
+
+        public DisciplineRepository(IDBHelper dbHelper)
+        {
+            _dbHelper = dbHelper;
+        }
+
+        public IEnumerable<DisciplineDTO> GetDisciplines(int facultyID)
         {
             using var command = new SqlCommand(Queries.GetDisciplines);
             command.Parameters.Add(new SqlParameter("@id", SqlDbType.Int) { Value = facultyID });
 
-            return DBHelper.GetData(new DisciplineDTOMapper(), command);
+            return _dbHelper.GetData(new DisciplineDTOMapper(), command);
         }
-        public static IEntityDTO AddDiscipline(string name, int facultyID)
+        public IEntityDTO AddDiscipline(string name, int facultyID)
         {
             using var command = new SqlCommand(Queries.AddDiscipline);
             command.Parameters.Add(new SqlParameter("@name", SqlDbType.NVarChar) { Value = name });
             command.Parameters.Add(new SqlParameter("@id", SqlDbType.Int) { Value = facultyID });
 
-            var id = (int)DBHelper.ExecuteScalar(command);
+            var id = _dbHelper.ExecuteScalar<int>(command);
             return new DisciplineDTO {ID = id, FacultyID = facultyID, InnerText = name};
         }
     }

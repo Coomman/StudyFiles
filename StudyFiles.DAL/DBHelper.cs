@@ -1,33 +1,28 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Configuration;
-using System.Data;
 using System.Data.SqlClient;
+
 using StudyFiles.DAL.Mappers;
 
 namespace StudyFiles.DAL
 {
-    public static class DBHelper
+    public class DBHelper : IDBHelper
     {
-        public static List<T> GetData<T>(IMapper<T> mapper, SqlCommand command)
+        private readonly SqlConnection _connection;
+
+        public DBHelper()
         {
-            var connectionString = Queries.DefaultConnection;
-
-            using var connection = new SqlConnection(connectionString);
-
-            return GetData(connection, mapper, command);
+            _connection = new SqlConnection(Queries.DefaultConnection);
+            _connection.Open();
         }
 
-        private static List<T> GetData<T>(SqlConnection connection, IMapper<T> mapper, SqlCommand command)
+        public IReadOnlyList<T> GetData<T>(IMapper<T> mapper, SqlCommand command)
         {
             var result = new List<T>();
 
             try
             {
-                if (connection.State != ConnectionState.Open)
-                    connection.Open();
-
-                command.Connection = connection;
+                command.Connection = _connection;
 
                 var reader = command.ExecuteReader();
                 while (reader.Read())
@@ -37,31 +32,19 @@ namespace StudyFiles.DAL
             }
             catch (Exception ex)
             {
-                Console.WriteLine(ex.Message);
+                Console.WriteLine(ex.Message); //TODO: Add logs
             }
 
             return result;
         }
 
-        public static T GetItem<T>(IMapper<T> mapper, SqlCommand command)
-        {
-            var connectionString = Queries.DefaultConnection;
-
-            using var connection = new SqlConnection(connectionString);
-
-            return GetItem(connection, mapper, command);
-        }
-
-        private static T GetItem<T>(SqlConnection connection, IMapper<T> mapper, SqlCommand command)
+        public T GetItem<T>(IMapper<T> mapper, SqlCommand command)
         {
             T result = default;
 
             try
             {
-                if (connection.State != ConnectionState.Open)
-                    connection.Open();
-
-                command.Connection = connection;
+                command.Connection = _connection;
 
                 var reader = command.ExecuteReader();
                 reader.Read();
@@ -77,31 +60,20 @@ namespace StudyFiles.DAL
             return result;
         }
 
-        public static object ExecuteScalar(SqlCommand command)
-        {
-            var connectionString = Queries.DefaultConnection;
-
-            using var connection = new SqlConnection(connectionString);
-
-            return ExecuteScalar(connection, command);
-        }
-        private static object ExecuteScalar(SqlConnection connection, SqlCommand command)
+        public T ExecuteScalar<T>(SqlCommand command)
         {
             try
             {
-                if (connection.State != ConnectionState.Open)
-                    connection.Open();
+                command.Connection = _connection;
 
-                command.Connection = connection;
-
-                return command.ExecuteScalar();
+                return (T) command.ExecuteScalar();
             }
             catch (Exception ex)
             {
                 Console.WriteLine(ex.Message);
             }
 
-            return null;
+            return default;
         }
     }
 }

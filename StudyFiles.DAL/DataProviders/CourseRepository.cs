@@ -6,22 +6,29 @@ using StudyFiles.DTO;
 
 namespace StudyFiles.DAL.DataProviders
 {
-    public static class CourseDataProvider
+    public class CourseRepository : ICourseRepository
     {
-        public static List<CourseDTO> GetCourses(int disciplineID)
+        private readonly IDBHelper _dbHelper;
+
+        public CourseRepository(IDBHelper dbHelper)
+        {
+            _dbHelper = dbHelper;
+        }
+
+        public IEnumerable<CourseDTO> GetCourses(int disciplineID)
         {
             using var command = new SqlCommand(Queries.GetCourses);
             command.Parameters.Add(new SqlParameter("@id", SqlDbType.Int) { Value = disciplineID });
 
-            return DBHelper.GetData(new CourseDTOMapper(), command);
+            return _dbHelper.GetData(new CourseDTOMapper(), command);
         }
-        public static IEntityDTO AddCourse(string teacherName, int disciplineID)
+        public IEntityDTO AddCourse(string teacherName, int disciplineID)
         {
             using var command = new SqlCommand(Queries.AddCourse);
             command.Parameters.Add(new SqlParameter("@teacher", SqlDbType.NVarChar) { Value = teacherName });
             command.Parameters.Add(new SqlParameter("@id", SqlDbType.Int) { Value = disciplineID });
 
-            var id = (int)DBHelper.ExecuteScalar(command);
+            var id = _dbHelper.ExecuteScalar<int>(command);
             return new CourseDTO{ID = id, DisciplineID = disciplineID, InnerText = teacherName};
         }
     }

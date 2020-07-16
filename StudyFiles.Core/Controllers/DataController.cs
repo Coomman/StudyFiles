@@ -9,32 +9,39 @@ namespace StudyFiles.Core.Controllers
     [Route("data")]
     public class DataController : ControllerBase
     {
+        private readonly IDataSupplier _dataSupplier;
+
+        public DataController(IDataSupplier dataSupplier)
+        {
+            _dataSupplier = dataSupplier;
+        }
+
         [HttpPost]
         [Route("folders")]
-        public IEnumerable<IEntityDTO> GetModelsList(FolderDataRequest request)
+        public IEnumerable<IEntityDTO> GetFolderList(FolderDataRequest request)
         {
-            return DataSupplier.GetModelsList(request.Depth, request.ID);
+            return _dataSupplier.GetFolderList(request.Depth, request.ID);
         }
 
         [HttpPost]
         [Route("files")]
         public IEnumerable<IEntityDTO> GetFileList(FileDataRequest request)
         {
-            return DataSupplier.GetFilesList(request.ID, request.Path);
+            return _dataSupplier.GetFileList(request.ID, request.Path);
         }
 
         [HttpPost]
         [Route("newFolder")]
         public IEntityDTO AddFolder(FolderDataRequest request)
         {
-            return DataSupplier.AddNewModel(request.Depth, request.ModelName, request.ID);
+            return _dataSupplier.AddNewFolder(request.Depth, request.ModelName, request.ID);
         }
 
         [HttpPost]
         [Route("upload")]
         public IEntityDTO AddNewModel(FileDataRequest request)
         {
-            return DataSupplier.UploadFile(request.Data, request.Path, request.ID);
+            return _dataSupplier.UploadFile(request.Data, request.Path, request.ID);
         }
 
         [HttpDelete]
@@ -48,7 +55,7 @@ namespace StudyFiles.Core.Controllers
         [Route("search")]
         public IEnumerable<IEntityDTO> FindFiles(int depth, string searchQuery)
         {
-            var result =  DataSupplier.FindFiles(depth, searchQuery).ToList();
+            var result = _dataSupplier.FindFiles(depth, searchQuery).ToList();
 
             if (!result.Any())
                 result.Add(new NotFoundDTO { InnerText = $"No files match \"{searchQuery}\" query" });
@@ -58,9 +65,9 @@ namespace StudyFiles.Core.Controllers
 
         [HttpGet]
         [Route("download")]
-        public byte[] ReadFile(string filePath)
+        public byte[] GetFile(string filePath)
         {
-            return DataSupplier.ReadFile(filePath);
+            return _dataSupplier.GetFile(filePath);
         }
     }
 }

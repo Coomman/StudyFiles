@@ -18,7 +18,7 @@ namespace StudyFiles.GUI
         //TODO:
         // 1) Refactor this class
         // 2) Fix several queries for file displaying error
-        // 3) Swap static classes on service to IoC
+        // 3) Fix search
         // 4) Add .doc and .docx formats support
 
         private string _tempFilePath;

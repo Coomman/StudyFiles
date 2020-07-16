@@ -1,25 +1,33 @@
 ﻿using System.Data;
 using System.Data.SqlClient;
 using System.Collections.Generic;
-using StudyFiles.DAL.Mappers;
+
 using StudyFiles.DTO;
+using StudyFiles.DAL.Mappers;
 
 namespace StudyFiles.DAL.DataProviders
 {
-    public static class UniversityDataProvider
+    public class UniversityRepository : IUniversityRepository
     {
-        public static List<UniversityDTO> GetUniversities()
+        private readonly IDBHelper _dbHelper;
+
+        public UniversityRepository(IDBHelper dbHelper)
+        {
+            _dbHelper = dbHelper;
+        }
+
+        public IEnumerable<UniversityDTO> GetUniversities()
         {
             using var command = new SqlCommand(Queries.GetUniversities);
 
-            return DBHelper.GetData(new UniversityDTOMapper(), command);
+            return _dbHelper.GetData(new UniversityDTOMapper(), command);
         }
-        public static IEntityDTO AddUniversity(string name)
+        public IEntityDTO AddUniversity(string name)
         {
             using var command = new SqlCommand(Queries.AddUniversity);
             command.Parameters.Add(new SqlParameter("@name", SqlDbType.NVarChar) {Value = name});
 
-            var id = (int) DBHelper.ExecuteScalar(command);
+            var id = _dbHelper.ExecuteScalar<int>(command);
             return new UniversityDTO {ID = id, InnerText = name};
         }
     }
