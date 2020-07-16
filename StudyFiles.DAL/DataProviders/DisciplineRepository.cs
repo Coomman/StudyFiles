@@ -6,7 +6,7 @@ using StudyFiles.DTO;
 
 namespace StudyFiles.DAL.DataProviders
 {
-    public class DisciplineRepository : IDisciplineRepository
+    public sealed class DisciplineRepository : IDisciplineRepository
     {
         private readonly IDBHelper _dbHelper;
 

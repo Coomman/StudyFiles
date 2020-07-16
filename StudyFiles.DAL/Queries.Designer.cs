@@ -106,6 +106,15 @@ namespace StudyFiles.DAL {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Select CONCAT_WS(&apos;/&apos;, U.Name, F.Name, D.Name, C.Teacher) as BreadCrumb from University as U inner join Faculty as F on(U.ID = F.UniversityID) inner join Discipline as D on(F.ID = D.FacultyID) inner join Course as C on(D.ID = C.DisciplineID) Where C.ID = @id.
+        /// </summary>
+        public static string GetBreadCrumb {
+            get {
+                return ResourceManager.GetString("GetBreadCrumb", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Select * from Course Where DisciplineID = @id.
         /// </summary>
         public static string GetCourses {
@@ -129,15 +138,6 @@ namespace StudyFiles.DAL {
         public static string GetFaculties {
             get {
                 return ResourceManager.GetString("GetFaculties", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Select CONCAT_WS(&apos;/&apos;, U.Name, F.Name, D.Name, C.Teacher) as BreadCrumb, CONCAT_WS(&apos;\\&apos;, U.ID, F.ID, D.ID, C.ID) as Path from University as U inner join Faculty as F on(U.ID = F.UniversityID) inner join Discipline as D on(F.ID = D.FacultyID) inner join Course as C on(D.ID = C.DisciplineID) Where C.ID = @id.
-        /// </summary>
-        public static string GetPath {
-            get {
-                return ResourceManager.GetString("GetPath", resourceCulture);
             }
         }
         

@@ -105,23 +105,20 @@ namespace StudyFiles.Core
 
         #endregion
 
-        public IEnumerable<IEntityDTO> FindFiles(int depth, string searchQuery)
+        public IEnumerable<IEntityDTO> FindFiles(string path, string searchQuery)
         {
-            //var searchPath = GetDirectory(depth).ToString();
+            var searchPath = Path.Combine(StoragePath, path);
 
-            //return Directory.GetFiles(searchPath, "*.*", SearchOption.AllDirectories)
-            //    .AsParallel()
-            //    .Select(filePath => (path: filePath, pageEntries: FileReader.PdfSearch(filePath, searchQuery)))
-            //    .Where(file => file.pageEntries.Any())
-            //    .Select(file => FileRepository.GetSearchResultDTO(new FileInfo(file.path), file.pageEntries, StoragePath))
-            //    .AsEnumerable();
-
-            return null;
+            return Directory.GetFiles(searchPath, "*.*", SearchOption.AllDirectories)
+                .AsParallel()
+                .Where(filePath => _fileRep.InFileSearch(filePath, searchQuery))
+                .Select(filePath => _fileRep.GetSearchResultDTO(new FileInfo(filePath)))
+                .AsEnumerable();
         }
 
         public byte[] GetFile(string filePath)
         {
-            return _fileRep.GetFile((Path.Combine(StoragePath, filePath)));
+            return _fileRep.GetFile(filePath);
         }
     }
 }

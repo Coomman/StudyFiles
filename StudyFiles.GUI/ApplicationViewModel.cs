@@ -2,6 +2,7 @@
 using System.Linq;
 using System.Windows.Input;
 using System.ComponentModel;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Runtime.CompilerServices;
 
@@ -17,9 +18,10 @@ namespace StudyFiles.GUI
     {
         //TODO:
         // 1) Refactor this class
-        // 2) Fix several queries for file displaying error
-        // 3) Fix search
-        // 4) Add .doc and .docx formats support
+        // 2) Switch to AppData/Local folder for temp files
+        // 3) Fix search command domains
+
+        // *) Switch all methods to Async
 
         private string _tempFilePath;
 
@@ -50,6 +52,15 @@ namespace StudyFiles.GUI
 
         private int Level 
             => _catalog.Count;
+        private void UpdateModels(IEntityDTO model)
+        {
+            Models = new ObservableCollection<IEntityDTO>(new[] {model});
+        }
+        private void UpdateModels(IEnumerable<IEntityDTO> models)
+        {
+            Models = new ObservableCollection<IEntityDTO>(models);
+        }
+
         private string GetDirectory()
         {
             var path = string.Empty;
@@ -65,7 +76,8 @@ namespace StudyFiles.GUI
             {
                 Title = "Select a file",
 
-                Filter = "PDF files (*.pdf)|*.pdf|" +
+                Filter = "All files (*.pdf;*.doc;*.docx;*.txt)|*.pdf;*.doc;*.docx;*.txt|" +
+                         "PDF files (*.pdf)|*.pdf|" +
                          "Microsoft Word (*.doc;*.docx)|*.doc;*.docx|" +
                          "Text files (*.txt)|*.txt"
             };
@@ -84,7 +96,7 @@ namespace StudyFiles.GUI
         {
             _catalog.Add(SelectedModel);
 
-            Models = new ObservableCollection<IEntityDTO>(Level == 4
+            UpdateModels(Level == 4
                 ? _serviceProxy.GetFileList(GetDirectory(), SelectedModel.ID)
                 : _serviceProxy.GetFolderList(Level, SelectedModel.ID));
 
@@ -101,31 +113,25 @@ namespace StudyFiles.GUI
             if(!(Models.Last() is FileViewDTO))
                 _catalog.RemoveAt(Level - 1);
 
-            Models = new ObservableCollection<IEntityDTO>(Level < 4
+            UpdateModels(Level < 4
                 ? _serviceProxy.GetFolderList(Level, _catalog.LastOrDefault()?.ID ?? -1)
                 : _serviceProxy.GetFileList(GetDirectory(), _catalog.Last().ID));
 
             SelectedModel = null;
         } //++
-        public void GetSearchResult(string query)
+        public void GetSearchResultList(string query)
         {
-            if (Models.First() is FileViewDTO)
-            {
-                Models = new ObservableCollection<IEntityDTO>(new[] {_serviceProxy.GetFile(Models[0].InnerText, ".pdf")});
-                return;
-            }
-
-            Models = new ObservableCollection<IEntityDTO>(_serviceProxy.FindFiles(GetDirectory(), query));
+            UpdateModels(_serviceProxy.FindFiles(GetDirectory(), query));
 
             _catalog.Add(new NullDTO());
-        }
+        } //++
 
         public void AddFolder(string name)
         {
             Models.RemoveAt(Models.Count - 1);
 
             Models.Add(_serviceProxy.AddNewFolder(Level, name, _catalog.Last().ID));
-        }
+        } //++
         public void AddItem()
         {
             if(Models.First() is NotFoundDTO)
@@ -135,27 +141,26 @@ namespace StudyFiles.GUI
                 Models.Add(new NullDTO());
             else
                 DisplayFileDialog();
-        }
+        } //++
 
         public void DeleteItem()
         {
             Models.Remove(SelectedModel);
             SelectedModel = null;
-        }
+        } //--
 
         public void ShowFile(string searchQuery = null)
         {
             if (SelectedModel is SearchResultDTO searchResult)
-                Models = new ObservableCollection<IEntityDTO>(new[]
-                    {_serviceProxy.GetFile($"{searchResult.Path}\\{searchResult.InnerText}", ".pdf")});
+                UpdateModels(_serviceProxy.GetFile(searchResult.Path, searchResult.Extension));
 
-            if (SelectedModel is FileDTO file)
+            else if (SelectedModel is FileDTO file)
             {
-                var fileView = _serviceProxy.GetFile(Path.Combine(GetDirectory(), SelectedModel.InnerText),
-                    file.Extension);
+                var fileView = _serviceProxy.GetFile(file.Path, file.Extension);
 
                 _tempFilePath = fileView.InnerText;
-                Models = new ObservableCollection<IEntityDTO>(new[] {fileView});
+
+                UpdateModels(fileView);
             }
         }
 
@@ -168,13 +173,14 @@ namespace StudyFiles.GUI
             => new DelegateCommand(obj => DeleteItem(),
                 obj => SelectedModel != null && Level != 5); //TODO: Add In-Search state
         public ICommand SearchCommand
-            => new DelegateCommand(obj => GetSearchResult(obj.ToString()),
-                obj => Models.Any() && !string.IsNullOrEmpty(obj.ToString())); //TODO: Add searchQuery domains
+            => new DelegateCommand(searchQuery => GetSearchResultList(searchQuery.ToString()),
+                searchQuery => !(_catalog.LastOrDefault() is NotFoundDTO || _catalog.LastOrDefault() is NullDTO) && !string.IsNullOrEmpty(searchQuery.ToString())); //TODO: Add searchQuery domains
 
         public ICommand OnFolderDoubleClickCommand
             => new DelegateCommand(obj => GetNextItemList());
         public ICommand OnFileDoubleClickCommand
             => new DelegateCommand(obj => ShowFile());
+
         public ICommand BackCommand
             => new DelegateCommand(obj => GetPrevItemList(),
                 obj => Level != 0);

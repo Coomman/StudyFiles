@@ -17,12 +17,13 @@ namespace StudyFiles.DTO
             set => FileInfo.InnerText = value;
         }
         public int SubType { get; } = 8;
+
+        public string Path => FileInfo.Path;
         public string Size => FileInfo.Size;
         public int CourseID => FileInfo.CourseID;
         public string CreationTime => FileInfo.CreationTime;
+        public string Extension => FileInfo.Extension;
 
-        public string Path { get; set; }
         public string BreadCrumb { get; set; }
-        public List<int> PageEntries { get; set; }
     }
 }

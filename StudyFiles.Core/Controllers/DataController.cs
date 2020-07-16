@@ -1,5 +1,4 @@
-﻿using System.Linq;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using Microsoft.AspNetCore.Mvc;
 using StudyFiles.DTO;
 
@@ -51,16 +50,11 @@ namespace StudyFiles.Core.Controllers
             
         }
 
-        [HttpGet]
+        [HttpPost]
         [Route("search")]
-        public IEnumerable<IEntityDTO> FindFiles(int depth, string searchQuery)
+        public IEnumerable<IEntityDTO> FindFiles(FileDataRequest request)
         {
-            var result = _dataSupplier.FindFiles(depth, searchQuery).ToList();
-
-            if (!result.Any())
-                result.Add(new NotFoundDTO { InnerText = $"No files match \"{searchQuery}\" query" });
-
-            return result;
+            return _dataSupplier.FindFiles(request.Path, request.ModelName);
         }
 
         [HttpGet]

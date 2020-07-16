@@ -13,6 +13,6 @@ namespace StudyFiles.Core
 
         public byte[] GetFile(string filePath);
 
-        public IEnumerable<IEntityDTO> FindFiles(int depth, string searchQuery);
+        public IEnumerable<IEntityDTO> FindFiles(string path, string searchQuery);
     }
 }

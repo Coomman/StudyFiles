@@ -1,4 +1,5 @@
 ﻿using System.IO;
+using System.Linq;
 using System.Net.Http;
 using System.Configuration;
 using System.Collections.Generic;
@@ -24,7 +25,7 @@ namespace StudyFiles.GUI.ServiceProxies
         private static void CheckRequestResult(IRestResponse request)
         {
             if(!request.IsSuccessful)
-                throw new HttpRequestException();
+                throw new HttpRequestException(request.ErrorMessage);
         }
 
         private T GetRequest<T>(string requestQuery)
@@ -75,7 +76,8 @@ namespace StudyFiles.GUI.ServiceProxies
 
             var result = GetRequest<byte[]>($"data/download?filePath={filePath}");
 
-            File.Create(tempFile).Write(result);
+            using (var fs = File.Create(tempFile))
+                fs.Write(result);
 
             return new FileViewDTO {InnerText = tempFile};
         }
@@ -93,7 +95,13 @@ namespace StudyFiles.GUI.ServiceProxies
 
         public List<IEntityDTO> FindFiles(string path, string searchQuery)
         {
-            return GetRequest<List<IEntityDTO>>($"data/search?path={path}&searchQuery={searchQuery}");
+            var result =  PostRequest<List<IEntityDTO>>("data/search",
+                new FileDataRequest {Path = path, ModelName = searchQuery});
+
+            if (!result.Any())
+                result.Add(new NotFoundDTO { InnerText = $"No files match \"{searchQuery}\" query" });
+
+            return result;
         }
     }
 }

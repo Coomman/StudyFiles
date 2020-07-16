@@ -7,6 +7,7 @@
         public int SubType { get; } = 4;
         public int CourseID { get; set; }
 
+        public string Path { get; set; }
         public string Size { get; set; }
         public string Extension { get; set; }
         public string CreationTime { get; set; }

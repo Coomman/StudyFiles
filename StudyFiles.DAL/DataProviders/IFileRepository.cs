@@ -10,8 +10,9 @@ namespace StudyFiles.DAL.DataProviders
 
         public byte[] GetFile(string filePath);
         public FileDTO UploadFile(byte[] data, string filePath, int courseId);
+        public bool InFileSearch(string filePath, string searchQuery);
 
         public FileDTO GetFileDTO(FileInfo fileInfo, int courseId);
-        public SearchResultDTO GetSearchResultDTO(FileInfo fileInfo, List<int> pageEntries, string storagePath);
+        public SearchResultDTO GetSearchResultDTO(FileInfo fileInfo);
     }
 }

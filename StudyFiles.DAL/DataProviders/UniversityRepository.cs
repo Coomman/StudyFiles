@@ -7,7 +7,7 @@ using StudyFiles.DAL.Mappers;
 
 namespace StudyFiles.DAL.DataProviders
 {
-    public class UniversityRepository : IUniversityRepository
+    public sealed class UniversityRepository : IUniversityRepository
     {
         private readonly IDBHelper _dbHelper;
 

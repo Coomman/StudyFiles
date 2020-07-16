@@ -6,7 +6,7 @@ using StudyFiles.DAL.Mappers;
 
 namespace StudyFiles.DAL
 {
-    public class DBHelper : IDBHelper
+    public sealed class DBHelper : IDBHelper
     {
         private readonly SqlConnection _connection;
 

@@ -132,6 +132,9 @@
   <data name="DefaultConnection" xml:space="preserve">
     <value>Data Source=localhost;Initial Catalog=StudyFiles;Integrated Security=true</value>
   </data>
+  <data name="GetBreadCrumb" xml:space="preserve">
+    <value>Select CONCAT_WS('/', U.Name, F.Name, D.Name, C.Teacher) as BreadCrumb from University as U inner join Faculty as F on(U.ID = F.UniversityID) inner join Discipline as D on(F.ID = D.FacultyID) inner join Course as C on(D.ID = C.DisciplineID) Where C.ID = @id</value>
+  </data>
   <data name="GetCourses" xml:space="preserve">
     <value>Select * from Course Where DisciplineID = @id</value>
   </data>
@@ -140,9 +143,6 @@
   </data>
   <data name="GetFaculties" xml:space="preserve">
     <value>Select * from Faculty Where UniversityID = @id</value>
-  </data>
-  <data name="GetPath" xml:space="preserve">
-    <value>Select CONCAT_WS('/', U.Name, F.Name, D.Name, C.Teacher) as BreadCrumb, CONCAT_WS('\\', U.ID, F.ID, D.ID, C.ID) as Path from University as U inner join Faculty as F on(U.ID = F.UniversityID) inner join Discipline as D on(F.ID = D.FacultyID) inner join Course as C on(D.ID = C.DisciplineID) Where C.ID = @id</value>
   </data>
   <data name="GetUniversities" xml:space="preserve">
     <value>Select * from University</value>
