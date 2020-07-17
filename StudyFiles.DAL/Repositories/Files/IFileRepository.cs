@@ -1,12 +1,13 @@
 ﻿using System.Collections.Generic;
 using System.IO;
 using StudyFiles.DTO.Files;
+using StudyFiles.DTO.Service;
 
 namespace StudyFiles.DAL.Repositories.Files
 {
     public interface IFileRepository
     {
-        public IEnumerable<FileDTO> GetFiles(DirectoryInfo dir, int courseId);
+        public IEnumerable<IEntityDTO> GetFiles(string dir, int courseId);
 
         public byte[] GetFile(string filePath);
         public FileDTO UploadFile(byte[] data, string filePath, int courseId);
@@ -16,7 +17,6 @@ namespace StudyFiles.DAL.Repositories.Files
 
         public bool InFileSearch(string filePath, string searchQuery);
 
-        public FileDTO GetFileDTO(FileInfo fileInfo, int courseId);
         public SearchResultDTO GetSearchResultDTO(FileInfo fileInfo);
     }
 }

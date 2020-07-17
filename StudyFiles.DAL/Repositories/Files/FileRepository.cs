@@ -5,7 +5,9 @@ using System.Data.SqlClient;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+
 using StudyFiles.DTO.Files;
+using StudyFiles.DTO.Service;
 
 namespace StudyFiles.DAL.Repositories.Files
 {
@@ -34,15 +36,18 @@ namespace StudyFiles.DAL.Repositories.Files
             return $"{(Math.Sign(byteCount) * num).ToString(CultureInfo.InvariantCulture)} {suf[place]}";
         }
 
-        public IEnumerable<FileDTO> GetFiles(DirectoryInfo dir, int courseId)
+        public IEnumerable<IEntityDTO> GetFiles(string dir, int courseId)
         {
-            return dir.GetFiles()
+            if(!Directory.Exists(dir))
+                return new[] {new NotFoundDTO()};
+
+            return new DirectoryInfo(dir).GetFiles()
                 .Select(fileInfo => GetFileDTO(fileInfo, courseId));
         }
 
         public byte[] GetFile(string filePath)
         {
-            return System.IO.File.ReadAllBytes(filePath);
+            return File.ReadAllBytes(filePath);
         }
         public FileDTO UploadFile(byte[] data, string filePath, int courseId)
         {
@@ -67,7 +72,7 @@ namespace StudyFiles.DAL.Repositories.Files
             return _fileReader.FileSearch(filePath, searchQuery);
         }
 
-        public FileDTO GetFileDTO (FileInfo fileInfo, int courseId)
+        private static FileDTO GetFileDTO (FileInfo fileInfo, int courseId)
         {
             return new FileDTO
             {

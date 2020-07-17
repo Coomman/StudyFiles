@@ -76,8 +76,8 @@ namespace StudyFiles.Core.Suppliers
             => _courseRep.GetCourses(disciplineID);
 
         public IEnumerable<IEntityDTO> GetFileList(int courseID, string filePath)
-            => _fileRep.GetFiles(new DirectoryInfo(Path.Combine(StoragePath, filePath)), courseID);
-        
+            => _fileRep.GetFiles(Path.Combine(StoragePath, filePath), courseID);
+
         #endregion
 
         #region Add
