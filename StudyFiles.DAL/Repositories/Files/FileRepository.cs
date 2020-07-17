@@ -51,6 +51,8 @@ namespace StudyFiles.DAL.Repositories.Files
         }
         public FileDTO UploadFile(byte[] data, string filePath, int courseId)
         {
+            Directory.CreateDirectory(Path.GetDirectoryName(filePath));
+
             var newFilePath = _fileReader.SaveFile(filePath, data);
 
             return GetFileDTO(new FileInfo(newFilePath), courseId);

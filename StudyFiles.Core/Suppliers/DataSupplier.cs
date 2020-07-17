@@ -50,6 +50,8 @@ namespace StudyFiles.Core.Suppliers
                 [2] = DeleteDiscipline,
                 [3] = DeleteCourse
             };
+
+            Directory.CreateDirectory(StoragePath);
         }
 
         #region Get

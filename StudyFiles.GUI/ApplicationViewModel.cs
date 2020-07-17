@@ -132,7 +132,7 @@ namespace StudyFiles.GUI
                     _inSearch = false;
                     _searchResultsCache = null;
                 }
-            else if (!(Models.First() is FileViewDTO))
+            else if (!(Models.FirstOrDefault() is FileViewDTO))
                 _catalog.RemoveAt(Level - 1);
 
             UpdateModels(Level < 4
@@ -221,7 +221,7 @@ namespace StudyFiles.GUI
                         GetSearchResultList();
                 },
                 searchQuery => !string.IsNullOrEmpty(searchQuery) &&
-                               !(Models.Last() is NotFoundDTO) && !(Models.Last() is NullDTO));
+                               !(Models.LastOrDefault() is NotFoundDTO) && !(Models.LastOrDefault() is NullDTO));
 
         public ICommand OnFolderDoubleClickCommand
             => new DelegateCommand(obj => GetNextItemList());
