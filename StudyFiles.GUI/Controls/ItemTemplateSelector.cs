@@ -1,6 +1,7 @@
 ﻿using System.Windows;
 using System.Windows.Controls;
-using StudyFiles.DTO;
+using StudyFiles.DTO.Files;
+using StudyFiles.DTO.Service;
 
 // ReSharper disable PossibleNullReferenceException
 
@@ -15,9 +16,9 @@ namespace StudyFiles.GUI.Controls
             var template = item switch
             {
                 NotFoundDTO _ => "NoMatches",
-                SearchResultDTO _ => "File",
-                NullDTO _ => "NullObject",
+                SearchResultDTO _ => "SearchResult",
                 FileDTO _ => "File",
+                NullDTO _ => "NullObject",
                 FileViewDTO _ => "FileView",
                 _ => "Folder"
             };

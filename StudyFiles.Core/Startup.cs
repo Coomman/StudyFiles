@@ -3,9 +3,10 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-
+using StudyFiles.Core.Suppliers;
 using StudyFiles.DAL;
-using StudyFiles.DAL.DataProviders;
+using StudyFiles.DAL.Repositories.Catalog;
+using StudyFiles.DAL.Repositories.Files;
 
 namespace StudyFiles.Core
 {

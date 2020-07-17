@@ -11,6 +11,10 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "StudyFiles.GUI", "StudyFile
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "StudyFiles.Core", "StudyFiles.Core\StudyFiles.Core.csproj", "{2E9ED875-583C-41F5-A631-8C6595C47860}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "StudyFiles.Auth", "StudyFiles.Auth\StudyFiles.Auth.csproj", "{D1661B9F-3AB8-4963-9368-17EFE5487BE5}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "StudyFiles.Logging", "StudyFiles.Logging\StudyFiles.Logging.csproj", "{3FF65765-FD25-483E-BEAF-10F86CB7751E}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -49,6 +53,22 @@ Global
 		{2E9ED875-583C-41F5-A631-8C6595C47860}.Release|Any CPU.Build.0 = Release|Any CPU
 		{2E9ED875-583C-41F5-A631-8C6595C47860}.Release|x86.ActiveCfg = Release|Any CPU
 		{2E9ED875-583C-41F5-A631-8C6595C47860}.Release|x86.Build.0 = Release|Any CPU
+		{D1661B9F-3AB8-4963-9368-17EFE5487BE5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D1661B9F-3AB8-4963-9368-17EFE5487BE5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D1661B9F-3AB8-4963-9368-17EFE5487BE5}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{D1661B9F-3AB8-4963-9368-17EFE5487BE5}.Debug|x86.Build.0 = Debug|Any CPU
+		{D1661B9F-3AB8-4963-9368-17EFE5487BE5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D1661B9F-3AB8-4963-9368-17EFE5487BE5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D1661B9F-3AB8-4963-9368-17EFE5487BE5}.Release|x86.ActiveCfg = Release|Any CPU
+		{D1661B9F-3AB8-4963-9368-17EFE5487BE5}.Release|x86.Build.0 = Release|Any CPU
+		{3FF65765-FD25-483E-BEAF-10F86CB7751E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3FF65765-FD25-483E-BEAF-10F86CB7751E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3FF65765-FD25-483E-BEAF-10F86CB7751E}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{3FF65765-FD25-483E-BEAF-10F86CB7751E}.Debug|x86.Build.0 = Debug|Any CPU
+		{3FF65765-FD25-483E-BEAF-10F86CB7751E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3FF65765-FD25-483E-BEAF-10F86CB7751E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3FF65765-FD25-483E-BEAF-10F86CB7751E}.Release|x86.ActiveCfg = Release|Any CPU
+		{3FF65765-FD25-483E-BEAF-10F86CB7751E}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

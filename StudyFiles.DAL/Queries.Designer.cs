@@ -97,11 +97,65 @@ namespace StudyFiles.DAL {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Insert into Auth (Email, Login, PasswordHash, Salt, RegistrationTime) values (@email, @login, @passHash, @salt, GETDATE()).
+        /// </summary>
+        public static string CreateAccount {
+            get {
+                return ResourceManager.GetString("CreateAccount", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Data Source=localhost;Initial Catalog=StudyFiles;Integrated Security=true.
         /// </summary>
         public static string DefaultConnection {
             get {
                 return ResourceManager.GetString("DefaultConnection", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Delete from Course where ID = @id.
+        /// </summary>
+        public static string DeleteCourse {
+            get {
+                return ResourceManager.GetString("DeleteCourse", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Delete from Discipline where ID = @id.
+        /// </summary>
+        public static string DeleteDiscipline {
+            get {
+                return ResourceManager.GetString("DeleteDiscipline", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Delete from Faculty where ID = @id.
+        /// </summary>
+        public static string DeleteFaculty {
+            get {
+                return ResourceManager.GetString("DeleteFaculty", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Delete from University where ID = @id.
+        /// </summary>
+        public static string DeleteUniversity {
+            get {
+                return ResourceManager.GetString("DeleteUniversity", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Update Auth Set Token = null Where ID = @id.
+        /// </summary>
+        public static string EndSession {
+            get {
+                return ResourceManager.GetString("EndSession", resourceCulture);
             }
         }
         
@@ -147,6 +201,51 @@ namespace StudyFiles.DAL {
         public static string GetUniversities {
             get {
                 return ResourceManager.GetString("GetUniversities", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Select ID, PasswordHash, Salt from Auth Where Login = @login.
+        /// </summary>
+        public static string GetUserData {
+            get {
+                return ResourceManager.GetString("GetUserData", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Select ID, Login, Token from Auth Where ID = @id.
+        /// </summary>
+        public static string RestoreSession {
+            get {
+                return ResourceManager.GetString("RestoreSession", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Update Auth Set Token = @token, TokenUpdated = GETDATE() Where ID = @id.
+        /// </summary>
+        public static string StartSession {
+            get {
+                return ResourceManager.GetString("StartSession", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Select * from Auth Where ID = @id and Token = @token.
+        /// </summary>
+        public static string ValidateToken {
+            get {
+                return ResourceManager.GetString("ValidateToken", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Select * from Auth Where Login = @login.
+        /// </summary>
+        public static string VerifyUserExistence {
+            get {
+                return ResourceManager.GetString("VerifyUserExistence", resourceCulture);
             }
         }
     }

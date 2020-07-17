@@ -129,8 +129,26 @@
   <data name="AddUniversity" xml:space="preserve">
     <value>Insert into University ([Name]) Output Inserted.ID values (@name)</value>
   </data>
+  <data name="CreateAccount" xml:space="preserve">
+    <value>Insert into Auth (Email, Login, PasswordHash, Salt, RegistrationTime) values (@email, @login, @passHash, @salt, GETDATE())</value>
+  </data>
   <data name="DefaultConnection" xml:space="preserve">
     <value>Data Source=localhost;Initial Catalog=StudyFiles;Integrated Security=true</value>
+  </data>
+  <data name="DeleteCourse" xml:space="preserve">
+    <value>Delete from Course where ID = @id</value>
+  </data>
+  <data name="DeleteDiscipline" xml:space="preserve">
+    <value>Delete from Discipline where ID = @id</value>
+  </data>
+  <data name="DeleteFaculty" xml:space="preserve">
+    <value>Delete from Faculty where ID = @id</value>
+  </data>
+  <data name="DeleteUniversity" xml:space="preserve">
+    <value>Delete from University where ID = @id</value>
+  </data>
+  <data name="EndSession" xml:space="preserve">
+    <value>Update Auth Set Token = null Where ID = @id</value>
   </data>
   <data name="GetBreadCrumb" xml:space="preserve">
     <value>Select CONCAT_WS('/', U.Name, F.Name, D.Name, C.Teacher) as BreadCrumb from University as U inner join Faculty as F on(U.ID = F.UniversityID) inner join Discipline as D on(F.ID = D.FacultyID) inner join Course as C on(D.ID = C.DisciplineID) Where C.ID = @id</value>
@@ -146,5 +164,20 @@
   </data>
   <data name="GetUniversities" xml:space="preserve">
     <value>Select * from University</value>
+  </data>
+  <data name="GetUserData" xml:space="preserve">
+    <value>Select ID, PasswordHash, Salt from Auth Where Login = @login</value>
+  </data>
+  <data name="RestoreSession" xml:space="preserve">
+    <value>Select ID, Login, Token from Auth Where ID = @id</value>
+  </data>
+  <data name="StartSession" xml:space="preserve">
+    <value>Update Auth Set Token = @token, TokenUpdated = GETDATE() Where ID = @id</value>
+  </data>
+  <data name="ValidateToken" xml:space="preserve">
+    <value>Select * from Auth Where ID = @id and Token = @token</value>
+  </data>
+  <data name="VerifyUserExistence" xml:space="preserve">
+    <value>Select * from Auth Where Login = @login</value>
   </data>
 </root>

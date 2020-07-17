@@ -1,13 +1,17 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data.SqlClient;
-
 using StudyFiles.DAL.Mappers;
+using StudyFiles.Logging;
+
+using ILogger = StudyFiles.Logging.ILogger;
 
 namespace StudyFiles.DAL
 {
     public sealed class DBHelper : IDBHelper
     {
+        private static readonly ILogger Logger = LoggerFactory.CreateLoggerFor<DBHelper>();
+
         private readonly SqlConnection _connection;
 
         public DBHelper()
@@ -32,7 +36,7 @@ namespace StudyFiles.DAL
             }
             catch (Exception ex)
             {
-                Console.WriteLine(ex.Message); //TODO: Add logs
+                Logger.Error(ex, $"Query: {command.CommandText}");
             }
 
             return result;
@@ -54,10 +58,24 @@ namespace StudyFiles.DAL
             }
             catch (Exception ex)
             {
-                Console.WriteLine(ex.Message);
+                Logger.Error(ex, $"Query: {command.CommandText}");
             }
 
             return result;
+        }
+
+        public void ExecuteNonQuery(SqlCommand command)
+        {
+            try
+            {
+                command.Connection = _connection;
+
+                command.ExecuteNonQuery();
+            }
+            catch (Exception ex)
+            {
+                Logger.Error(ex, $"Query: {command.CommandText}");
+            }
         }
 
         public T ExecuteScalar<T>(SqlCommand command)
@@ -70,7 +88,7 @@ namespace StudyFiles.DAL
             }
             catch (Exception ex)
             {
-                Console.WriteLine(ex.Message);
+                Logger.Error(ex, $"Query: {command.CommandText}");
             }
 
             return default;

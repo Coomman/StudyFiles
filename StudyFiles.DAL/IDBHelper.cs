@@ -10,6 +10,8 @@ namespace StudyFiles.DAL
 
         public T GetItem<T>(IMapper<T> mapper, SqlCommand command);
 
+        public void ExecuteNonQuery(SqlCommand command);
+
         public T ExecuteScalar<T>(SqlCommand command);
     }
 }

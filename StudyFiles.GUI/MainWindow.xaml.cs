@@ -1,10 +1,8 @@
 ﻿using System;
 using System.Windows;
-using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
-
-// ReSharper disable PossibleNullReferenceException
+using System.Windows.Controls;
 
 namespace StudyFiles.GUI
 {
@@ -17,12 +15,17 @@ namespace StudyFiles.GUI
         {
             InitializeComponent();
 
-            DataContext = new ApplicationViewModel();
+            var vm = new ApplicationViewModel();
+            vm.OnSearchStateExit += OnSearchStateExit;
+
+            DataContext = vm;
         }
 
-        private void Back_OnClick(object sender, RoutedEventArgs e)
+        private void OnSearchStateExit()
         {
             SearchBox.Clear();
+            SearchBox.Focus();
+            Table.Focus();
         }
 
         private void NewItem_OnInitialized(object? sender, EventArgs e)
@@ -32,12 +35,12 @@ namespace StudyFiles.GUI
         }
         private void NewItem_OnLostFocus(object sender, RoutedEventArgs e)
         {
-            var textBox = sender as TextBox;
+            var textBox = (TextBox) sender;
 
             if (textBox.Text.Length == 0)
                 return;
 
-            var vm = DataContext as ApplicationViewModel;
+            var vm = (ApplicationViewModel) DataContext;
             vm.AddFolder(textBox.Text);
         }
         private void NewItem_OnKeyDown(object sender, KeyEventArgs e)
@@ -52,7 +55,7 @@ namespace StudyFiles.GUI
         }
         private void SearchBox_OnMouseLeave(object sender, MouseEventArgs e)
         {
-            if (!SearchBox.IsFocused)
+            if (!SearchBox.IsFocused && SearchBox.Text.Length == 0)
                 SearchBorder.Background = Brushes.Transparent;
         }
         private void SearchBox_OnLostFocus(object sender, RoutedEventArgs e)

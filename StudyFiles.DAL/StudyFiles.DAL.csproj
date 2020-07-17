@@ -15,6 +15,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\StudyFiles.DTO\StudyFiles.DTO.csproj" />
+    <ProjectReference Include="..\StudyFiles.Logging\StudyFiles.Logging.csproj" />
   </ItemGroup>
   
   <ItemGroup>

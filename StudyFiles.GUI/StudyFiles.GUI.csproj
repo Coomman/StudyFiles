@@ -13,12 +13,15 @@
     <PackageReference Include="MaterialDesignThemes" Version="3.1.3" />
     <PackageReference Include="Microsoft.VisualStudio.Utilities" Version="16.6.30107.105" />
     <PackageReference Include="Microsoft.Windows.SDK.Contracts" Version="10.0.19041.1" />
+    <PackageReference Include="MvvmLight" Version="5.4.1.1" />
+    <PackageReference Include="MvvmLightLibs" Version="5.4.1.1" />
     <PackageReference Include="RestSharp" Version="106.11.4" />
     <PackageReference Include="RestSharp.Serializers.NewtonsoftJson" Version="106.11.4" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\StudyFiles.DTO\StudyFiles.DTO.csproj" />
+    <ProjectReference Include="..\StudyFiles.Logging\StudyFiles.Logging.csproj" />
   </ItemGroup>
 
   <ItemGroup>

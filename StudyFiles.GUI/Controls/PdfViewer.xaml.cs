@@ -9,7 +9,7 @@ using System.Windows.Media;
 using System.Windows.Interop;
 using System.Windows.Controls;
 using System.Windows.Media.Imaging;
-using System.Windows.Threading;
+
 using Windows.Data.Pdf;
 using Windows.Storage.Streams;
 
@@ -45,18 +45,6 @@ namespace StudyFiles.GUI.Controls
                 .Select(ConvertImage)
                 .ToList()
                 .ForEach(img => items.Add(img));
-
-            //if (string.IsNullOrEmpty(pdfDrawer.ImageSource))
-            //    return;
-
-            //var path = Path.GetFullPath(pdfDrawer.ImageSource);
-
-            //StorageFile.GetFileFromPathAsync(path).AsTask()
-            //    //load pdf document on background thread
-            //    .ContinueWith(task => PdfDocument.LoadFromFileAsync(task.Result).AsTask()).Unwrap()
-            //    //display on UI Thread
-            //    .ContinueWith(task => PdfToImages(pdfDrawer, task.Result),
-            //        TaskScheduler.FromCurrentSynchronizationContext());
         }
 
         #endregion

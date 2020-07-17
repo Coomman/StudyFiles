@@ -15,7 +15,7 @@
         TextOptions.TextRenderingMode="Auto"        
         Background="{DynamicResource MaterialDesignPaper}"
         FontFamily="{DynamicResource MaterialDesignFont}"
-        Title="StudyFiles" Width="1280" Height="720">
+        Name="Catalog" Title="StudyFiles" Width="1280" Height="720">
 
     <Window.InputBindings>
         <MouseBinding MouseAction="LeftClick" Command="{Binding WindowMouseClickCommand}"></MouseBinding>
@@ -25,16 +25,16 @@
         <controls:ItemTemplateSelector x:Key="ItemTemplateSelector"/>
 
             <DataTemplate x:Key="Folder">
-                <StackPanel Margin="5" Orientation="Horizontal" Background="Transparent">
-                    <StackPanel.InputBindings>
+            <StackPanel Margin="5" Orientation="Horizontal" Background="Transparent">
+                <StackPanel.InputBindings>
                     <MouseBinding MouseAction="LeftDoubleClick" Command="{Binding RelativeSource={RelativeSource AncestorType=ListBox},
                         Path=DataContext.OnFolderDoubleClickCommand}"/>
-                    </StackPanel.InputBindings>
+                </StackPanel.InputBindings>
 
                 <materialDesign:PackIcon Kind="FolderOutline" VerticalAlignment="Center" FontSize="18"/>
-                    <TextBlock FontSize="18" Text="{Binding Path=InnerText, Mode=OneWay}" VerticalAlignment="Center" Margin="5"/>
-                </StackPanel>
-            </DataTemplate>
+                <TextBlock FontSize="18" Text="{Binding Path=InnerText, Mode=OneWay}" VerticalAlignment="Center" Margin="5"/>
+            </StackPanel>
+        </DataTemplate>
 
             <DataTemplate x:Key="NullObject">
             <StackPanel Margin="5" Orientation="Horizontal" Background="Transparent">
@@ -53,24 +53,53 @@
         </DataTemplate>
 
         <DataTemplate x:Key="File">
-            <StackPanel Margin="5" Orientation="Horizontal" Background="Transparent">
-                <StackPanel.InputBindings>
+            <DockPanel Margin="5" Background="Transparent">
+                <DockPanel.InputBindings>
                     <MouseBinding MouseAction="LeftDoubleClick" Command="{Binding RelativeSource={RelativeSource AncestorType=ListBox},
                         Path=DataContext.OnFileDoubleClickCommand}"/>
-                </StackPanel.InputBindings>
+                </DockPanel.InputBindings>
 
-                <materialDesign:PackIcon Kind="FileOutline" FontSize="18" VerticalAlignment="Center" DockPanel.Dock="Left"/>
-                <TextBlock DockPanel.Dock="Left" FontSize="18" Text="{Binding Path=InnerText, Mode=OneWay}" 
-                           VerticalAlignment="Center" Margin="5"/>
-                <TextBlock FontSize="18" Text="{Binding Path=CreationTime, Mode=OneWay}"
-                           VerticalAlignment="Center" HorizontalAlignment="Center" Margin="200, 0, 600, 0"/>
-                <TextBlock DockPanel.Dock="Right" FontSize="14" Text="{Binding Path=Size, Mode=OneWay}"
-                           FontStyle="Italic" VerticalAlignment="Center"/>
-            </StackPanel>
+                <materialDesign:PackIcon Kind="FileOutline" FontSize="18"
+                                         DockPanel.Dock="Left" VerticalAlignment="Center"/>
+
+                <TextBlock FontSize="18" Text="{Binding Path=InnerText, Mode=OneWay}" Margin="5"
+                           VerticalAlignment="Center" DockPanel.Dock="Left"/>
+
+                <TextBlock FontSize="14" Text="{Binding Path=Size, Mode=OneWay}" Margin="5"
+                           FontStyle="Italic" VerticalAlignment="Center" DockPanel.Dock="Right"/>
+
+                <TextBlock FontSize="18" Text="{Binding Path=CreationTime, Mode=OneWay}" Margin="0 0 50 0"
+                           VerticalAlignment="Center" HorizontalAlignment="Right"/>
+            </DockPanel>
+        </DataTemplate>
+
+        <DataTemplate x:Key="SearchResult">
+            <DockPanel Margin="5" Background="Transparent">
+                <DockPanel.InputBindings>
+                    <MouseBinding MouseAction="LeftDoubleClick" Command="{Binding RelativeSource={RelativeSource AncestorType=ListBox},
+                        Path=DataContext.OnSearchResultDoubleClickCommand}"/>
+                </DockPanel.InputBindings>
+
+                <materialDesign:PackIcon Kind="FileSearchOutline" FontSize="18"
+                                         DockPanel.Dock="Left" VerticalAlignment="Center"/>
+
+                <TextBlock FontSize="18" Text="{Binding Path=InnerText, Mode=OneWay}" Margin="5"
+                           VerticalAlignment="Center" DockPanel.Dock="Left"/>
+
+                <TextBlock FontSize="14" Text="{Binding Path=Size, Mode=OneWay}" Margin="5"
+                           FontStyle="Italic" VerticalAlignment="Center" DockPanel.Dock="Right"/>
+
+                <TextBlock FontSize="18" Text="{Binding Path=CreationTime, Mode=OneWay}" Margin="50 0 50 0"
+                           VerticalAlignment="Center" HorizontalAlignment="Right" DockPanel.Dock="Right"/>
+
+                <TextBlock FontSize="14" Text="{Binding Path=BreadCrumb, Mode=OneWay}"
+                           FontStyle="Italic" VerticalAlignment="Center" HorizontalAlignment="Right" DockPanel.Dock="Right"/>
+            </DockPanel>
         </DataTemplate>
 
         <DataTemplate x:Key="FileView">
-            <web:ChromiumWebBrowser x:Name="Browser" Address="{Binding Path=InnerText}"
+            <web:ChromiumWebBrowser WebBrowser="{Binding RelativeSource={RelativeSource AncestorType=ListBox}, Path=DataContext.Browser, Mode=OneWayToSource}"
+                                    Address="{Binding Path=InnerText}"
                                     Height="{Binding RelativeSource={RelativeSource AncestorType=Window}, Path=ActualHeight}"/>
         </DataTemplate>
     </Window.Resources>
@@ -78,7 +107,7 @@
     <StackPanel>
         <Grid Height="50" VerticalAlignment="Top" Background="#FF4572A0">
             <Button Name="Back" Background="{x:Null}" BorderBrush="{x:Null}" HorizontalAlignment="Left" Margin="10 0"
-                    Click="Back_OnClick" Command="{Binding BackCommand}">
+                    Command="{Binding BackCommand}">
                 <materialDesign:PackIcon Kind="ArrowBack" Width="25" Height="25"/>
             </Button>
 
