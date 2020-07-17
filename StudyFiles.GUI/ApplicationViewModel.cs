@@ -128,7 +128,7 @@ namespace StudyFiles.GUI
                 }
                 else
                 {
-                    OnSearchStateExit.Invoke();
+                    OnSearchStateExit?.Invoke();
                     _inSearch = false;
                     _searchResultsCache = null;
                 }

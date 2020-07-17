@@ -14,10 +14,22 @@ namespace StudyFiles.DAL
 
         private readonly SqlConnection _connection;
 
+        private void OpenConnection()
+        {
+            _connection.Open();
+        }
+
         public DBHelper()
         {
-            _connection = new SqlConnection(Queries.DefaultConnection);
-            _connection.Open();
+            try
+            {
+                _connection = new SqlConnection(Queries.DefaultConnection);
+                OpenConnection();
+            }
+            catch (Exception e)
+            {
+                Logger.Error(e, "Error occured on connection open");
+            }
         }
 
         public IReadOnlyList<T> GetData<T>(IMapper<T> mapper, SqlCommand command)

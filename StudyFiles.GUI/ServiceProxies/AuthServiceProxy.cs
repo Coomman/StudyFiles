@@ -26,7 +26,7 @@ namespace StudyFiles.GUI.ServiceProxies
             if (request.IsSuccessful)
                 return;
 
-            var ex = new HttpRequestException("Error occured in AuthService Client");
+            var ex = new HttpRequestException($"Error occured in AuthService Client: {request.ErrorMessage}");
             Logger.Error(ex, request.ErrorMessage);
             throw ex;
         }

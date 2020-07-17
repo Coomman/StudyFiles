@@ -31,7 +31,7 @@ namespace StudyFiles.GUI.ServiceProxies
             if (request.IsSuccessful)
                 return;
 
-            var ex = new HttpRequestException("Error occured in DataService Client");
+            var ex = new HttpRequestException($"Error occured in DataService Client: {request.ErrorMessage}");
             Logger.Error(ex, request.ErrorMessage);
             throw ex;
         }
