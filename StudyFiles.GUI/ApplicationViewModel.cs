@@ -221,7 +221,7 @@ namespace StudyFiles.GUI
                         GetSearchResultList();
                 },
                 searchQuery => !string.IsNullOrEmpty(searchQuery) &&
-                               !(_catalog.LastOrDefault() is NotFoundDTO) && !(_catalog.LastOrDefault() is NullDTO));
+                               !(Models.Last() is NotFoundDTO) && !(Models.Last() is NullDTO));
 
         public ICommand OnFolderDoubleClickCommand
             => new DelegateCommand(obj => GetNextItemList());

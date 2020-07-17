@@ -145,6 +145,9 @@ namespace StudyFiles.Core.Suppliers
         {
             var searchPath = Path.Combine(StoragePath, path);
 
+            if(!Directory.Exists(searchPath))
+                return Array.Empty<IEntityDTO>();
+
             return Directory.GetFiles(searchPath, "*.*", SearchOption.AllDirectories)
                 .AsParallel()
                 .Where(filePath => _fileRep.InFileSearch(filePath, searchQuery))
